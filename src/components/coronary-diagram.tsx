@@ -51,15 +51,16 @@ const LEFT_SEGMENTS: SegmentDef[] = [
   // Seg 8: Distal/Apical LAD — curves down to apex
   { id: '8',   d: 'M 318 130 C 322 155, 320 185, 310 218',     labelX: 324, labelY: 180, labelAnchor: 'start' },
 
-  // Seg 9: First Diagonal (D1) — perpendicular to LAD, branches left-downward from proximal LAD
-  { id: '9',   d: 'M 278 72 C 268 82, 258 94, 250 108',        labelX: 245, labelY: 104, labelAnchor: 'end' },
-  // Seg 9a: First Diagonal a — extension of D1, continues same direction
-  { id: '9a',  d: 'M 250 108 C 244 118, 238 130, 234 142',     labelX: 229, labelY: 138, labelAnchor: 'end' },
+  // Seg 9: First Diagonal (D1) — branches RIGHT-downward from proximal LAD, away from LCx
+  // LAD at seg 6/7 junction is ~(290,82). D1 goes right and down, parallel to D2.
+  { id: '9',   d: 'M 282 76 C 292 86, 304 98, 314 112',        labelX: 318, labelY: 108, labelAnchor: 'start' },
+  // Seg 9a: First Diagonal a — extension of D1, continues right-downward
+  { id: '9a',  d: 'M 314 112 C 320 122, 326 134, 330 148',     labelX: 334, labelY: 144, labelAnchor: 'start' },
 
-  // Seg 10: Second Diagonal (D2) — perpendicular to LAD, parallel to D1, from mid LAD
-  { id: '10',  d: 'M 300 96 C 290 106, 280 118, 272 132',      labelX: 267, labelY: 128, labelAnchor: 'end' },
+  // Seg 10: Second Diagonal (D2) — parallel to D1, branches from mid LAD, right-downward
+  { id: '10',  d: 'M 308 108 C 318 118, 330 130, 340 144',     labelX: 344, labelY: 140, labelAnchor: 'start' },
   // Seg 10a: Second Diagonal a — extension, same direction
-  { id: '10a', d: 'M 272 132 C 266 142, 260 154, 256 166',     labelX: 251, labelY: 162, labelAnchor: 'end' },
+  { id: '10a', d: 'M 340 144 C 346 154, 350 166, 354 178',     labelX: 358, labelY: 174, labelAnchor: 'start' },
 
   // === LCx system (goes down-left from bifurcation) ===
   // Seg 11: Proximal LCx — from bifurcation, curves down and left
@@ -129,7 +130,7 @@ export function CoronaryDiagram({ dominance, lesions, activeLesionId, onSegmentT
   return (
     <div className="relative">
       <svg
-        viewBox="0 0 370 250"
+        viewBox="0 0 390 250"
         className="w-full"
         style={{ userSelect: 'none', maxHeight: 380 }}
       >
