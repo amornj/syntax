@@ -68,8 +68,8 @@ const LEFT_SEGMENTS: SegmentDef[] = [
   // Seg 11: Proximal LCx — from bifurcation, curves down and left
   { id: '11',  d: 'M 260 58 C 252 66, 240 75, 228 82',         labelX: 238, labelY: 60, labelAnchor: 'end' },
 
-  // Seg 12: Intermediate/Anterolateral — branch down from prox LCx
-  { id: '12',  d: 'M 248 68 C 250 80, 252 92, 254 108',        labelX: 258, labelY: 95, labelAnchor: 'start' },
+  // Seg 12: Ramus Intermedius — branches DOWN from LM bifurcation point (260,58), between LAD and LCx
+  { id: '12',  d: 'M 260 58 C 260 72, 260 88, 260 108',        labelX: 264, labelY: 90, labelAnchor: 'start' },
 
   // Seg 12a: OM1 — branch down from LCx
   { id: '12a', d: 'M 238 76 C 240 88, 242 102, 244 118',       labelX: 248, labelY: 108, labelAnchor: 'start' },
@@ -238,6 +238,50 @@ export function CoronaryDiagram({ dominance, lesions, activeLesionId, onSegmentT
       {lesions.length === 0 && (
         <p className="text-center text-xs text-slate-400 mt-1">Add a lesion below to start scoring</p>
       )}
+
+      {/* ── Segment name reference ── */}
+      <details className="mt-2">
+        <summary className="text-xs text-slate-400 cursor-pointer hover:text-slate-600 text-center">
+          Segment reference
+        </summary>
+        <div className="mt-1.5 grid grid-cols-2 gap-x-4 gap-y-0 text-[10px] text-slate-500 leading-relaxed px-1">
+          <div className="space-y-0">
+            <p className="font-semibold text-slate-600 text-[11px] mb-0.5">RCA</p>
+            <p><span className="font-medium text-slate-700">1</span> — RCA Proximal</p>
+            <p><span className="font-medium text-slate-700">2</span> — RCA Mid</p>
+            <p><span className="font-medium text-slate-700">3</span> — RCA Distal</p>
+            {dominance === 'right' && <>
+              <p><span className="font-medium text-slate-700">4</span> — PDA (from RCA)</p>
+              <p><span className="font-medium text-slate-700">16</span> — Posterolateral</p>
+              <p><span className="font-medium text-slate-700">16a</span> — Posterolateral a</p>
+              <p><span className="font-medium text-slate-700">16b</span> — Posterolateral b</p>
+              <p><span className="font-medium text-slate-700">16c</span> — Posterolateral c</p>
+            </>}
+          </div>
+          <div className="space-y-0">
+            <p className="font-semibold text-slate-600 text-[11px] mb-0.5">LCA</p>
+            <p><span className="font-medium text-slate-700">5</span> — Left Main</p>
+            <p><span className="font-medium text-slate-700">6</span> — LAD Proximal</p>
+            <p><span className="font-medium text-slate-700">7</span> — LAD Mid</p>
+            <p><span className="font-medium text-slate-700">8</span> — LAD Apical</p>
+            <p><span className="font-medium text-slate-700">9</span> — 1st Diagonal (D1)</p>
+            <p><span className="font-medium text-slate-700">9a</span> — 1st Diagonal a</p>
+            <p><span className="font-medium text-slate-700">10</span> — 2nd Diagonal (D2)</p>
+            <p><span className="font-medium text-slate-700">10a</span> — 2nd Diagonal a</p>
+            <p><span className="font-medium text-slate-700">11</span> — LCx Proximal</p>
+            <p><span className="font-medium text-slate-700">12</span> — Ramus Intermedius</p>
+            <p><span className="font-medium text-slate-700">12a</span> — Obtuse Marginal 1</p>
+            <p><span className="font-medium text-slate-700">12b</span> — Obtuse Marginal 2</p>
+            <p><span className="font-medium text-slate-700">13</span> — LCx Distal</p>
+            <p><span className="font-medium text-slate-700">14</span> — Left Posterolateral</p>
+            <p><span className="font-medium text-slate-700">14a</span> — Left Posterolateral a</p>
+            <p><span className="font-medium text-slate-700">14b</span> — Left Posterolateral b</p>
+            {dominance === 'left' && (
+              <p><span className="font-medium text-slate-700">15</span> — PDA (from LCx)</p>
+            )}
+          </div>
+        </div>
+      </details>
     </div>
   )
 }
