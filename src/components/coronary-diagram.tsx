@@ -3,65 +3,91 @@
 import { Dominance, Lesion, SegmentId } from '@/lib/types'
 import { getAvailableSegments, getSegmentWeight } from '@/lib/segments'
 
-interface SegmentLineDef {
+/* ──────────────────────────────────────────────────
+   Anatomically-correct coronary artery SVG diagram
+   Standard angiographic orientation:
+     LEFT side  = RCA (backwards C-shape)
+     RIGHT side = LM → LAD (right/down) + LCx (left/down)
+   ────────────────────────────────────────────────── */
+
+interface SegmentDef {
   id: SegmentId
-  x1: number; y1: number; x2: number; y2: number
-  labelX: number; labelY: number
-  anchor: 'start' | 'middle' | 'end'
+  d: string                 // SVG path "d" attribute (Bézier curves)
+  labelX: number
+  labelY: number
+  labelAnchor: 'start' | 'middle' | 'end'
 }
 
-const SEGMENT_LINES: SegmentLineDef[] = [
-  // RCA
-  { id: '1',   x1: 300, y1:  25, x2: 316, y2:  80, labelX: 322, labelY:  52, anchor: 'start' },
-  { id: '2',   x1: 316, y1:  80, x2: 319, y2: 152, labelX: 328, labelY: 116, anchor: 'start' },
-  { id: '3',   x1: 319, y1: 152, x2: 309, y2: 224, labelX: 322, labelY: 189, anchor: 'start' },
-  { id: '4',   x1: 309, y1: 224, x2: 286, y2: 270, labelX: 299, labelY: 255, anchor: 'start' },
-  // PLV (right dom only)
-  { id: '16',  x1: 317, y1: 166, x2: 292, y2: 188, labelX: 288, labelY: 187, anchor: 'end'   },
-  { id: '16a', x1: 292, y1: 188, x2: 280, y2: 202, labelX: 276, labelY: 201, anchor: 'end'   },
-  { id: '16b', x1: 280, y1: 202, x2: 270, y2: 215, labelX: 266, labelY: 214, anchor: 'end'   },
-  { id: '16c', x1: 270, y1: 215, x2: 262, y2: 227, labelX: 258, labelY: 226, anchor: 'end'   },
-  // LM
-  { id: '5',   x1: 165, y1:  25, x2: 165, y2:  68, labelX: 151, labelY:  48, anchor: 'end'   },
-  // LAD
-  { id: '6',   x1: 165, y1:  68, x2: 137, y2: 130, labelX: 124, labelY:  99, anchor: 'end'   },
-  { id: '7',   x1: 137, y1: 130, x2: 123, y2: 199, labelX: 108, labelY: 166, anchor: 'end'   },
-  { id: '8',   x1: 123, y1: 199, x2: 112, y2: 270, labelX:  97, labelY: 236, anchor: 'end'   },
-  // Diagonals (branch from seg 6 & 7 midpoints)
-  { id: '9',   x1: 151, y1:  99, x2: 197, y2: 112, labelX: 199, labelY: 108, anchor: 'start' },
-  { id: '9a',  x1: 197, y1: 112, x2: 222, y2: 120, labelX: 224, labelY: 116, anchor: 'start' },
-  { id: '10',  x1: 130, y1: 164, x2: 172, y2: 173, labelX: 174, labelY: 169, anchor: 'start' },
-  { id: '10a', x1: 172, y1: 173, x2: 195, y2: 179, labelX: 197, labelY: 175, anchor: 'start' },
-  // LCx (from LM bifurcation, going left)
-  { id: '11',  x1: 165, y1:  68, x2:  87, y2:  82, labelX: 126, labelY:  61, anchor: 'middle' },
-  // OM branches (from seg 11 at t≈0.39, 0.62, 0.80)
-  { id: '12',  x1: 134, y1:  74, x2: 127, y2: 113, labelX: 114, labelY:  96, anchor: 'end'   },
-  { id: '12a', x1: 117, y1:  77, x2: 110, y2: 116, labelX:  97, labelY:  99, anchor: 'end'   },
-  { id: '12b', x1: 103, y1:  80, x2:  96, y2: 119, labelX:  83, labelY: 103, anchor: 'end'   },
-  // LCx distal
-  { id: '13',  x1:  87, y1:  82, x2:  65, y2: 154, labelX:  51, labelY: 119, anchor: 'end'   },
-  // LPL branches (from seg 13 midpoint)
-  { id: '14',  x1:  76, y1: 118, x2:  97, y2: 141, labelX: 100, labelY: 138, anchor: 'start' },
-  { id: '14a', x1:  97, y1: 141, x2: 110, y2: 154, labelX: 113, labelY: 151, anchor: 'start' },
-  { id: '14b', x1: 110, y1: 154, x2: 121, y2: 165, labelX: 124, labelY: 163, anchor: 'start' },
-  // PDA from LCx (left dom only)
-  { id: '15',  x1:  65, y1: 154, x2:  85, y2: 198, labelX:  67, labelY: 182, anchor: 'end'   },
+// ── RIGHT DOMINANT paths ──
+const RCA_SEGMENTS: SegmentDef[] = [
+  // Seg 1: RCA proximal — top of C, curves left and down
+  { id: '1',  d: 'M 95 30 C 90 35, 68 42, 55 65',             labelX: 100, labelY: 38, labelAnchor: 'start' },
+  // Seg 2: RCA mid — descends on left side of C
+  { id: '2',  d: 'M 55 65 C 44 85, 38 110, 38 140',            labelX: 28, labelY: 105, labelAnchor: 'end' },
+  // Seg 3: RCA distal — bottom of C, curves right
+  { id: '3',  d: 'M 38 140 C 38 165, 45 185, 62 200',          labelX: 30, labelY: 175, labelAnchor: 'end' },
+  // Seg 4: PDA from RCA — continues right along bottom
+  { id: '4',  d: 'M 62 200 C 75 210, 95 218, 120 222',         labelX: 95, labelY: 235, labelAnchor: 'middle' },
+  // Seg 16: Posterolateral from RCA — fans upward from distal RCA
+  { id: '16', d: 'M 62 200 C 70 192, 82 184, 95 178',          labelX: 98, labelY: 174, labelAnchor: 'start' },
+  // Seg 16a: first posterolateral sub-branch
+  { id: '16a', d: 'M 72 196 C 80 186, 90 176, 100 168',        labelX: 103, labelY: 164, labelAnchor: 'start' },
+  // Seg 16b: second posterolateral sub-branch
+  { id: '16b', d: 'M 78 192 C 88 180, 98 170, 108 160',        labelX: 111, labelY: 156, labelAnchor: 'start' },
+  // Seg 16c: third posterolateral sub-branch
+  { id: '16c', d: 'M 84 188 C 94 175, 105 164, 115 154',       labelX: 118, labelY: 150, labelAnchor: 'start' },
 ]
 
-// Dots at key branch/bifurcation points
-const BRANCH_DOTS = [
-  { cx: 165, cy: 68 },   // LM → LAD + LCx
-  { cx: 151, cy: 99 },   // D1 origin on LAD
-  { cx: 130, cy: 164 },  // D2 origin on LAD
-  { cx: 134, cy: 74 },   // IM origin on LCx
-  { cx: 117, cy: 77 },   // OM1 origin on LCx
-  { cx: 103, cy: 80 },   // OM2 origin on LCx
-  { cx:  76, cy: 118 },  // LPL origin on LCx distal
-  { cx: 317, cy: 166 },  // PLV origin on RCA
+// ── LEFT CORONARY SYSTEM paths ──
+const LEFT_SEGMENTS: SegmentDef[] = [
+  // Seg 5: Left Main — short, enters from upper-right going left
+  { id: '5',   d: 'M 280 30 C 275 38, 268 48, 260 58',         labelX: 286, labelY: 36, labelAnchor: 'start' },
+
+  // === LAD system (continues right and curves down) ===
+  // Seg 6: Proximal LAD — from bifurcation, goes right
+  { id: '6',   d: 'M 260 58 C 268 65, 280 72, 290 82',         labelX: 295, labelY: 68, labelAnchor: 'start' },
+  // Seg 7: Mid LAD — continues right, begins curving down
+  { id: '7',   d: 'M 290 82 C 302 94, 312 110, 318 130',       labelX: 324, labelY: 110, labelAnchor: 'start' },
+  // Seg 8: Distal/Apical LAD — curves down to apex
+  { id: '8',   d: 'M 318 130 C 322 155, 320 185, 310 218',     labelX: 324, labelY: 180, labelAnchor: 'start' },
+
+  // Seg 9: First Diagonal (D1) — branches up-left from proximal LAD
+  { id: '9',   d: 'M 275 70 C 282 80, 290 92, 296 108',        labelX: 300, labelY: 92, labelAnchor: 'start' },
+  // Seg 9a: First Diagonal a — extension of D1
+  { id: '9a',  d: 'M 296 108 C 300 118, 304 128, 306 140',     labelX: 310, labelY: 130, labelAnchor: 'start' },
+
+  // Seg 10: Second Diagonal (D2) — branches from mid LAD
+  { id: '10',  d: 'M 305 100 C 314 110, 322 122, 328 138',     labelX: 333, labelY: 125, labelAnchor: 'start' },
+  // Seg 10a: Second Diagonal a
+  { id: '10a', d: 'M 328 138 C 332 148, 335 158, 336 168',     labelX: 340, labelY: 158, labelAnchor: 'start' },
+
+  // === LCx system (goes down-left from bifurcation) ===
+  // Seg 11: Proximal LCx — from bifurcation, curves down and left
+  { id: '11',  d: 'M 260 58 C 252 66, 240 75, 228 82',         labelX: 238, labelY: 60, labelAnchor: 'end' },
+
+  // Seg 12: Intermediate/Anterolateral — branch down from prox LCx
+  { id: '12',  d: 'M 248 68 C 250 80, 252 92, 254 108',        labelX: 258, labelY: 95, labelAnchor: 'start' },
+
+  // Seg 12a: OM1 — branch down from LCx
+  { id: '12a', d: 'M 238 76 C 240 88, 242 102, 244 118',       labelX: 248, labelY: 108, labelAnchor: 'start' },
+  // Seg 12b: OM2 — branch down from LCx
+  { id: '12b', d: 'M 232 80 C 234 92, 236 106, 238 122',       labelX: 242, labelY: 118, labelAnchor: 'start' },
+
+  // Seg 13: Distal LCx — continues down-left
+  { id: '13',  d: 'M 228 82 C 218 92, 206 108, 198 128',       labelX: 192, labelY: 110, labelAnchor: 'end' },
+
+  // Seg 14: Left Posterolateral — branches right from distal LCx
+  { id: '14',  d: 'M 210 100 C 218 110, 226 120, 234 132',     labelX: 238, labelY: 128, labelAnchor: 'start' },
+  // Seg 14a: Left Posterolateral a
+  { id: '14a', d: 'M 204 115 C 212 126, 222 136, 230 148',     labelX: 234, labelY: 144, labelAnchor: 'start' },
+  // Seg 14b: Left Posterolateral b
+  { id: '14b', d: 'M 198 128 C 208 140, 218 152, 228 164',     labelX: 232, labelY: 160, labelAnchor: 'start' },
+
+  // Seg 15: PDA from LCx (LEFT DOMINANT ONLY) — at bottom, sweeps right
+  { id: '15',  d: 'M 198 128 C 195 150, 198 175, 210 200',     labelX: 190, labelY: 175, labelAnchor: 'end' },
 ]
 
-// Branch dots that only exist in specific dominance
-const BRANCH_DOTS_RIGHT_ONLY = [{ cx: 317, cy: 166 }]
+const ALL_SEGMENTS = [...RCA_SEGMENTS, ...LEFT_SEGMENTS]
 
 interface Props {
   dominance: Dominance
@@ -73,7 +99,7 @@ interface Props {
 export function CoronaryDiagram({ dominance, lesions, activeLesionId, onSegmentToggle }: Props) {
   const available = new Set(getAvailableSegments(dominance).map(s => s.id))
 
-  // Map segment → lesion color
+  // Map segment → lesion color (last lesion wins if overlapping)
   const segmentColors: Record<string, string> = {}
   for (const lesion of lesions) {
     for (const segId of lesion.segments) {
@@ -86,92 +112,128 @@ export function CoronaryDiagram({ dominance, lesions, activeLesionId, onSegmentT
 
   const getStrokeColor = (segId: SegmentId) => {
     if (segmentColors[segId]) return segmentColors[segId]
-    return '#d1d5db'
+    return '#cbd5e1' // slate-300
   }
 
   const getStrokeWidth = (segId: SegmentId) => {
     const w = getSegmentWeight(segId, dominance)
-    if (w >= 3.5) return 8
-    if (w >= 1.0) return 6
-    return 4
+    if (w >= 5.0) return 7  // LM
+    if (w >= 3.0) return 6  // pLAD, mLAD
+    if (w >= 1.5) return 5  // pLCx (left dom), RCA main
+    if (w >= 1.0) return 4  // most segments
+    return 3                 // 0.5 weight branches
   }
+
+  const isClickable = activeLesionId !== null
 
   return (
     <div className="relative">
       <svg
-        viewBox="0 0 395 290"
+        viewBox="0 0 370 250"
         className="w-full"
-        style={{ userSelect: 'none', maxHeight: 360 }}
+        style={{ userSelect: 'none', maxHeight: 380 }}
       >
-        {/* Aortic root */}
-        <line x1="162" y1="25" x2="302" y2="25" stroke="#9ca3af" strokeWidth={2} strokeDasharray="4 2" />
-        <text x="232" y="19" textAnchor="middle" fontSize={8} fill="#9ca3af" fontStyle="italic">Aorta</text>
+        {/* ── Aortic root ── */}
+        <path
+          d="M 85 26 C 85 14, 100 8, 115 8 L 260 8 C 275 8, 290 14, 290 26"
+          fill="none" stroke="#e2e8f0" strokeWidth={1.5}
+        />
+        <text x="188" y="8" textAnchor="middle" fontSize={7} fill="#94a3b8" fontStyle="italic">Aorta</text>
 
-        {/* Vessel labels */}
-        <text x="328" y="20" fontSize={9} fill="#6b7280" fontWeight={700}>RCA</text>
-        <text x="148" y="20" textAnchor="end" fontSize={9} fill="#6b7280" fontWeight={700}>LM</text>
-        <text x="95"  y="284" textAnchor="middle" fontSize={9} fill="#6b7280" fontWeight={700}>LAD</text>
-        <text x="32"  y="102" textAnchor="end" fontSize={9} fill="#6b7280" fontWeight={700}>LCx</text>
+        {/* ── Vessel group labels ── */}
+        <text x="60" y="22" textAnchor="middle" fontSize={9} fill="#64748b" fontWeight={700}>RCA</text>
+        <text x="308" y="22" textAnchor="middle" fontSize={9} fill="#64748b" fontWeight={700}>LCA</text>
 
-        {/* Branch dots */}
-        {BRANCH_DOTS.map((dot, i) => {
-          const isRightOnly = BRANCH_DOTS_RIGHT_ONLY.some(d => d.cx === dot.cx && d.cy === dot.cy)
-          if (isRightOnly && dominance !== 'right') return null
-          return (
-            <circle key={i} cx={dot.cx} cy={dot.cy} r={3} fill="#9ca3af" />
-          )
-        })}
+        {/* ── Dashed segment boundary lines ── */}
+        {/* RCA boundaries */}
+        <line x1="48" y1="60" x2="62" y2="70" stroke="#94a3b8" strokeWidth={0.8} strokeDasharray="3 2" />
+        <line x1="32" y1="135" x2="46" y2="145" stroke="#94a3b8" strokeWidth={0.8} strokeDasharray="3 2" />
+        {/* LAD boundaries */}
+        <line x1="286" y1="76" x2="296" y2="86" stroke="#94a3b8" strokeWidth={0.8} strokeDasharray="3 2" />
+        <line x1="314" y1="124" x2="324" y2="134" stroke="#94a3b8" strokeWidth={0.8} strokeDasharray="3 2" />
 
-        {/* Segments */}
-        {SEGMENT_LINES.map(seg => {
+        {/* ── Render all segment paths ── */}
+        {ALL_SEGMENTS.map(seg => {
           if (!available.has(seg.id)) return null
 
           const color = getStrokeColor(seg.id)
           const isInActiveLesion = activeSegments.has(seg.id)
-          const isClickable = activeLesionId !== null
           const sw = getStrokeWidth(seg.id)
+          const isAssigned = !!segmentColors[seg.id]
 
           return (
             <g key={seg.id} className={isClickable ? 'cursor-pointer' : 'cursor-default'}>
-              {/* Wide transparent hit area */}
-              <line
-                x1={seg.x1} y1={seg.y1} x2={seg.x2} y2={seg.y2}
+              {/* Wide transparent hit area for clicking */}
+              <path
+                d={seg.d}
+                fill="none"
                 stroke="transparent"
-                strokeWidth={22}
+                strokeWidth={24}
                 onClick={() => isClickable && onSegmentToggle(seg.id)}
               />
-              {/* Visible segment line */}
-              <line
-                x1={seg.x1} y1={seg.y1} x2={seg.x2} y2={seg.y2}
+              {/* Visible vessel path */}
+              <path
+                d={seg.d}
+                fill="none"
                 stroke={color}
                 strokeWidth={isInActiveLesion ? sw + 2 : sw}
                 strokeLinecap="round"
-                strokeOpacity={isInActiveLesion ? 1 : color === '#d1d5db' ? 0.8 : 0.9}
-                style={{ transition: 'stroke 0.15s, stroke-width 0.1s' }}
+                strokeLinejoin="round"
+                strokeOpacity={isInActiveLesion ? 1 : isAssigned ? 0.9 : 0.6}
+                style={{ transition: 'stroke 0.15s, stroke-width 0.15s, stroke-opacity 0.15s' }}
                 pointerEvents="none"
               />
-              {/* Segment label */}
+              {/* Segment number label */}
               <text
                 x={seg.labelX}
                 y={seg.labelY}
-                textAnchor={seg.anchor}
-                fontSize={8}
-                fill={color === '#d1d5db' ? '#9ca3af' : '#374151'}
-                fontWeight={isInActiveLesion ? 700 : 500}
+                textAnchor={seg.labelAnchor}
+                fontSize={7.5}
+                fill={isAssigned ? '#1e293b' : '#94a3b8'}
+                fontWeight={isInActiveLesion ? 700 : isAssigned ? 600 : 400}
                 className="pointer-events-none select-none"
+                fontFamily="system-ui, sans-serif"
               >
                 {seg.id}
               </text>
             </g>
           )
         })}
+
+        {/* ── Bifurcation dots ── */}
+        <circle cx={260} cy={58} r={2.5} fill="#94a3b8" /> {/* LM bifurcation */}
+        <circle cx={95} cy={30} r={2.5} fill="#94a3b8" />  {/* RCA ostium */}
+        <circle cx={280} cy={30} r={2.5} fill="#94a3b8" />  {/* LM ostium */}
+
+        {/* ── Legend ── */}
+        <g transform="translate(5, 238)">
+          <text fontSize={7} fill="#94a3b8" fontFamily="system-ui">
+            {dominance === 'right' ? '● Right Dominant' : '● Left Dominant'}
+          </text>
+        </g>
+
+        {/* ── Color legend for stenosis ── */}
+        {lesions.length > 0 && (
+          <g transform="translate(280, 232)">
+            {lesions.slice(0, 6).map((l, i) => (
+              <g key={l.id} transform={`translate(${i * 14}, 0)`}>
+                <circle cx={5} cy={5} r={4} fill={l.color} opacity={0.9} />
+                <text x={5} y={15} textAnchor="middle" fontSize={6} fill="#64748b">L{i + 1}</text>
+              </g>
+            ))}
+          </g>
+        )}
       </svg>
 
+      {/* Hint text */}
       {!activeLesionId && lesions.length > 0 && (
-        <p className="text-center text-xs text-gray-400 mt-1">Expand a lesion card to select segments on diagram</p>
+        <p className="text-center text-xs text-slate-400 mt-1">Expand a lesion card to select segments on diagram</p>
+      )}
+      {activeLesionId && (
+        <p className="text-center text-xs text-indigo-500 font-medium mt-1">Click segments to add/remove from lesion</p>
       )}
       {lesions.length === 0 && (
-        <p className="text-center text-xs text-gray-400 mt-1">Add a lesion below to start</p>
+        <p className="text-center text-xs text-slate-400 mt-1">Add a lesion below to start scoring</p>
       )}
     </div>
   )
