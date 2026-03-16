@@ -51,16 +51,18 @@ const LEFT_SEGMENTS: SegmentDef[] = [
   // Seg 8: Distal/Apical LAD — curves down to apex
   { id: '8',   d: 'M 318 130 C 322 155, 320 185, 310 218',     labelX: 324, labelY: 180, labelAnchor: 'start' },
 
-  // Seg 9: First Diagonal (D1) — branches RIGHT-downward from proximal LAD, away from LCx
-  // LAD at seg 6/7 junction is ~(290,82). D1 goes right and down, parallel to D2.
-  { id: '9',   d: 'M 282 76 C 292 86, 304 98, 314 112',        labelX: 318, labelY: 108, labelAnchor: 'start' },
-  // Seg 9a: First Diagonal a — extension of D1, continues right-downward
-  { id: '9a',  d: 'M 314 112 C 320 122, 326 134, 330 148',     labelX: 334, labelY: 144, labelAnchor: 'start' },
+  // All diagonals branch RIGHT-downward from LAD, parallel to each other, away from LCx.
+  // LAD path: seg6 ~(260,58)→(290,82), seg7 ~(290,82)→(318,130), seg8 ~(318,130)→(310,218)
+  // Diagonal direction: roughly 40° right-downward (dx=+20, dy=+35 per unit)
 
-  // Seg 10: Second Diagonal (D2) — parallel to D1, branches from mid LAD, right-downward
-  { id: '10',  d: 'M 308 108 C 318 118, 330 130, 340 144',     labelX: 344, labelY: 140, labelAnchor: 'start' },
-  // Seg 10a: Second Diagonal a — extension, same direction
-  { id: '10a', d: 'M 340 144 C 346 154, 350 166, 354 178',     labelX: 358, labelY: 174, labelAnchor: 'start' },
+  // Seg 9: D1 — takes off from PROXIMAL LAD (seg 6, ~halfway at 275,70)
+  { id: '9',   d: 'M 275 70 C 286 80, 296 95, 304 112',        labelX: 308, labelY: 108, labelAnchor: 'start' },
+  // Seg 9a: D1a — takes off from PROXIMAL-MID LAD junction (seg 6/7 boundary at ~290,82)
+  { id: '9a',  d: 'M 290 82 C 300 92, 312 107, 320 124',       labelX: 324, labelY: 120, labelAnchor: 'start' },
+  // Seg 10: D2 — takes off from MID LAD (seg 7, ~halfway at 305,106)
+  { id: '10',  d: 'M 305 106 C 316 116, 326 131, 334 148',     labelX: 338, labelY: 144, labelAnchor: 'start' },
+  // Seg 10a: D2a — takes off from MID-DISTAL LAD junction (seg 7/8 boundary at ~318,130)
+  { id: '10a', d: 'M 318 130 C 328 140, 338 155, 346 172',     labelX: 350, labelY: 168, labelAnchor: 'start' },
 
   // === LCx system (goes down-left from bifurcation) ===
   // Seg 11: Proximal LCx — from bifurcation, curves down and left
