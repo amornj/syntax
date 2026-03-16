@@ -28,14 +28,14 @@ const RCA_SEGMENTS: SegmentDef[] = [
   { id: '3',  d: 'M 38 140 C 38 165, 45 185, 62 200',          labelX: 30, labelY: 175, labelAnchor: 'end' },
   // Seg 4: PDA from RCA — continues right along bottom
   { id: '4',  d: 'M 62 200 C 75 210, 95 218, 120 222',         labelX: 95, labelY: 235, labelAnchor: 'middle' },
-  // Seg 16: Posterolateral from RCA — fans upward from distal RCA
-  { id: '16', d: 'M 62 200 C 70 192, 82 184, 95 178',          labelX: 98, labelY: 174, labelAnchor: 'start' },
-  // Seg 16a: first posterolateral sub-branch
-  { id: '16a', d: 'M 72 196 C 80 186, 90 176, 100 168',        labelX: 103, labelY: 164, labelAnchor: 'start' },
-  // Seg 16b: second posterolateral sub-branch
-  { id: '16b', d: 'M 78 192 C 88 180, 98 170, 108 160',        labelX: 111, labelY: 156, labelAnchor: 'start' },
-  // Seg 16c: third posterolateral sub-branch
-  { id: '16c', d: 'M 84 188 C 94 175, 105 164, 115 154',       labelX: 118, labelY: 150, labelAnchor: 'start' },
+  // Seg 16: Posterolateral from RCA — goes up-right from crux area
+  { id: '16', d: 'M 62 200 C 72 190, 85 182, 100 176',         labelX: 104, labelY: 172, labelAnchor: 'start' },
+  // Seg 16a: perpendicular to seg 16 trajectory (16 goes ~30° up-right, so 16a goes ~120° = down-right)
+  { id: '16a', d: 'M 74 193 C 80 200, 86 208, 92 216',         labelX: 96, labelY: 218, labelAnchor: 'start' },
+  // Seg 16b: perpendicular to seg 16, from middle of 16
+  { id: '16b', d: 'M 85 186 C 92 194, 98 202, 104 210',        labelX: 108, labelY: 212, labelAnchor: 'start' },
+  // Seg 16c: perpendicular to seg 16, from distal 16
+  { id: '16c', d: 'M 96 180 C 102 188, 108 196, 114 204',      labelX: 118, labelY: 206, labelAnchor: 'start' },
 ]
 
 // ── LEFT CORONARY SYSTEM paths ──
@@ -51,15 +51,15 @@ const LEFT_SEGMENTS: SegmentDef[] = [
   // Seg 8: Distal/Apical LAD — curves down to apex
   { id: '8',   d: 'M 318 130 C 322 155, 320 185, 310 218',     labelX: 324, labelY: 180, labelAnchor: 'start' },
 
-  // Seg 9: First Diagonal (D1) — branches up-left from proximal LAD
-  { id: '9',   d: 'M 275 70 C 282 80, 290 92, 296 108',        labelX: 300, labelY: 92, labelAnchor: 'start' },
-  // Seg 9a: First Diagonal a — extension of D1
-  { id: '9a',  d: 'M 296 108 C 300 118, 304 128, 306 140',     labelX: 310, labelY: 130, labelAnchor: 'start' },
+  // Seg 9: First Diagonal (D1) — perpendicular to LAD, branches left-downward from proximal LAD
+  { id: '9',   d: 'M 278 72 C 268 82, 258 94, 250 108',        labelX: 245, labelY: 104, labelAnchor: 'end' },
+  // Seg 9a: First Diagonal a — extension of D1, continues same direction
+  { id: '9a',  d: 'M 250 108 C 244 118, 238 130, 234 142',     labelX: 229, labelY: 138, labelAnchor: 'end' },
 
-  // Seg 10: Second Diagonal (D2) — branches from mid LAD
-  { id: '10',  d: 'M 305 100 C 314 110, 322 122, 328 138',     labelX: 333, labelY: 125, labelAnchor: 'start' },
-  // Seg 10a: Second Diagonal a
-  { id: '10a', d: 'M 328 138 C 332 148, 335 158, 336 168',     labelX: 340, labelY: 158, labelAnchor: 'start' },
+  // Seg 10: Second Diagonal (D2) — perpendicular to LAD, parallel to D1, from mid LAD
+  { id: '10',  d: 'M 300 96 C 290 106, 280 118, 272 132',      labelX: 267, labelY: 128, labelAnchor: 'end' },
+  // Seg 10a: Second Diagonal a — extension, same direction
+  { id: '10a', d: 'M 272 132 C 266 142, 260 154, 256 166',     labelX: 251, labelY: 162, labelAnchor: 'end' },
 
   // === LCx system (goes down-left from bifurcation) ===
   // Seg 11: Proximal LCx — from bifurcation, curves down and left
