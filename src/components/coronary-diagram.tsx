@@ -51,18 +51,18 @@ const LEFT_SEGMENTS: SegmentDef[] = [
   // Seg 8: Distal/Apical LAD — curves down to apex
   { id: '8',   d: 'M 318 130 C 322 155, 320 185, 310 218',     labelX: 324, labelY: 180, labelAnchor: 'start' },
 
-  // All diagonals branch RIGHT-downward from LAD, parallel to each other, away from LCx.
-  // LAD path: seg6 ~(260,58)→(290,82), seg7 ~(290,82)→(318,130), seg8 ~(318,130)→(310,218)
-  // Diagonal direction: roughly 40° right-downward (dx=+20, dy=+35 per unit)
+  // All diagonals branch at 45° off LAD trajectory, parallel to each other, away from LCx.
+  // LAD direction ~(+1, +1.2) normalized. 45° clockwise from that ≈ (+1, +0.1) = nearly horizontal right.
+  // Diagonal direction: dx=+40, dy=+5 (almost horizontal, slight downward slope)
 
-  // Seg 9: D1 — takes off from PROXIMAL LAD (seg 6, ~halfway at 275,70)
-  { id: '9',   d: 'M 275 70 C 286 80, 296 95, 304 112',        labelX: 308, labelY: 108, labelAnchor: 'start' },
-  // Seg 9a: D1a — takes off from PROXIMAL-MID LAD junction (seg 6/7 boundary at ~290,82)
-  { id: '9a',  d: 'M 290 82 C 300 92, 312 107, 320 124',       labelX: 324, labelY: 120, labelAnchor: 'start' },
-  // Seg 10: D2 — takes off from MID LAD (seg 7, ~halfway at 305,106)
-  { id: '10',  d: 'M 305 106 C 316 116, 326 131, 334 148',     labelX: 338, labelY: 144, labelAnchor: 'start' },
-  // Seg 10a: D2a — takes off from MID-DISTAL LAD junction (seg 7/8 boundary at ~318,130)
-  { id: '10a', d: 'M 318 130 C 328 140, 338 155, 346 172',     labelX: 350, labelY: 168, labelAnchor: 'start' },
+  // Seg 9: D1 — from PROXIMAL LAD (mid seg 6, at ~275,70)
+  { id: '9',   d: 'M 275 70 C 288 72, 302 74, 318 77',         labelX: 322, labelY: 74, labelAnchor: 'start' },
+  // Seg 9a: D1a — from PROX-MID LAD junction (seg 6/7 boundary, at ~290,82)
+  { id: '9a',  d: 'M 290 82 C 303 84, 317 86, 333 89',         labelX: 337, labelY: 86, labelAnchor: 'start' },
+  // Seg 10: D2 — from MID LAD (mid seg 7, at ~305,106)
+  { id: '10',  d: 'M 305 106 C 318 108, 332 110, 348 113',     labelX: 352, labelY: 110, labelAnchor: 'start' },
+  // Seg 10a: D2a — from MID-DISTAL LAD junction (seg 7/8 boundary, at ~318,130)
+  { id: '10a', d: 'M 318 130 C 331 132, 345 134, 361 137',     labelX: 365, labelY: 134, labelAnchor: 'start' },
 
   // === LCx system (goes down-left from bifurcation) ===
   // Seg 11: Proximal LCx — from bifurcation, curves down and left
