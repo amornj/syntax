@@ -2,11 +2,12 @@
 
 import { useState, useCallback } from 'react'
 import { Dominance, Lesion, SegmentId } from '@/lib/types'
-import { createNewLesion, calculateLesionScore } from '@/lib/syntax-score'
+import { createNewLesion, calculateLesionScore, calculateTotalScore } from '@/lib/syntax-score'
 import { getAvailableSegments } from '@/lib/segments'
 import { CoronaryDiagram } from './coronary-diagram'
 import { LesionCard } from './lesion-card'
 import { ScorePanel } from './score-panel'
+import { SyntaxIIPanel } from './syntax-ii-panel'
 
 // ── Diffuse disease (inline, simple) ─────────────────────────────────────────
 function DiffuseDisease({
@@ -122,6 +123,16 @@ export function SyntaxCalculator() {
     setExpandedLesionId(null)
   }
 
+  const syntaxIScore = calculateTotalScore({
+    dominance,
+    lesions,
+    diffuseDiseaseSegments,
+    currentStep: 'results',
+    editingLesionId: null,
+    lesionStep: 'segments',
+  })
+  const hasLeftMainDisease = lesions.some(l => l.segments.includes('5'))
+
   return (
     <div className="max-w-5xl mx-auto px-4 py-6 space-y-4">
 
@@ -232,6 +243,18 @@ export function SyntaxCalculator() {
         selected={diffuseDiseaseSegments}
         onToggle={toggleDiffuseSegment}
       />
+
+      {/* ── SYNTAX II ── */}
+      <div>
+        <div className="flex items-center gap-3 mb-2">
+          <h2 className="text-sm font-semibold text-gray-600 uppercase tracking-wider">SYNTAX Score II</h2>
+          <span className="text-xs text-gray-400">Clinical risk prediction — PCI vs CABG</span>
+        </div>
+        <SyntaxIIPanel
+          syntaxIScore={syntaxIScore}
+          hasLeftMainDisease={hasLeftMainDisease}
+        />
+      </div>
 
       {/* ── Footer ── */}
       <div className="flex items-center justify-between pt-3 border-t border-gray-100">

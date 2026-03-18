@@ -1,0 +1,232 @@
+<!DOCTYPE HTML PUBLIC '-//W3C//DTD HTML 4.01 Transitional//EN'>
+<HTML>
+<!-- 
+/*******************************************************
+ * Syntax Score Calculator Version 2.2                 *
+ *                                                     *
+ * Orginal code (version 1.0):  ISM (2005)             *
+ * Adaptations  (version 2.0):  MvG Creative (2009)    *
+ * Adaptations  (version 2.2):  MvG Creative (2013)    *
+ * Adaptations  (version 2.28): MvG Creative (2016)    *
+ *******************************************************/
+-->
+<HEAD>
+<META HTTP-EQUIV="CACHE-CONTROL" CONTENT="NO-CACHE">
+<META HTTP-EQUIV="EXPIRES" CONTENT="0">
+<META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
+<TITLE>syntax</TITLE>
+<LINK rel="stylesheet" type="text/css" href="stylesheet/css.css">
+<LINK rel="stylesheet" type="text/css" href="stylesheet/print.css" media="print">
+	<script language="javascript" type="text/javascript" src="javascript/version.js"></script>
+	<script language="javascript" type="text/javascript" src="javascript/redirect.js"></script>
+	<script language="javascript" type="text/javascript" src="javascript/scoreoverview.js"></script>
+	<script language="javascript" type="text/javascript" src="javascript/sylvester.js"></script>
+	<script language="javascript" type="text/javascript" src="javascript/jstat.js"></script>
+	<script language="javascript" type="text/javascript" src="javascript/syntaxscore2.js?2S"></script>
+        <script language="javascript" type="text/javascript" src="javascript/overlib.js"></script>
+        
+            
+</HEAD>
+<BODY BGCOLOR="#FFFFFF" onload="javascript:setVersion(); parent.PrintScoreIfNeeded(); parent.GeneratePdfIfNeeded(); initSS2();">
+  <div style="WIDTH:100%;TEXT-ALIGN:left"><br>
+    <span style="FONT-WEIGHT:bold" class="genheader">SYNTAX Score II questions</span>
+  </div>
+  <div style="height: 40px; margin-top:12px;">
+    <div id="ss2ValidationError" style="color: #ff0000; padding:0px; margin:0px; display:none;">
+      <p> The given input values are not valid. Please correct the questions with the red annotations below.</p>
+    </div>
+  </div>
+  <div>
+    <form id="syntaxScore2Form" onSubmit="javascript:return false;">
+    <table class="ss2QuestionsTable">
+      <tr class="ss2QuestionRow">
+	<td style="width: 180px;">SYNTAX Score I
+           <a href='#' onMouseOver="javascript:return overlib('Insert a previously calculated SYNTAX Score I result.', CAPTION, 'Information');" onMouseOut="javascript:return nd();">
+             <img border=0 src='images/moreinfo.gif' width=16 height=16 >
+           </a>
+	</td>
+        <td style="width: 320px;">
+	  <input type="text" size="5" style="width: 50px;" id="ss2SyntaxScore1"/>
+        </td>
+      </tr>
+      <tr class="ss2ValidationRow">
+	<td colspan="2"><div id="ss2ValidationSs1Score" style="display:none;">
+	    Syntax Score I needs to be a round or fractional number between 0 and 120. The decimal separator is a '.' (dot), e.g. 3.5
+	</div></td>
+      </tr>
+      <tr class="ss2QuestionRow">
+	<td>Age (years)
+           <a href='#' onMouseOver="javascript:return overlib('Due to the rarity of complex coronary artery disease in pre-menopausal women, mortality predictions in younger women are predominantly based on the linear relationship of age with mortality. The differences in mortality predictions in younger woman between CABG and PCI, will therefore be affected by larger 95% confidence intervals (CIs) but be equally valid.', CAPTION, 'Age');" onMouseOut="javascript:return nd();">
+             <img border=0 src='images/moreinfo.gif' width=16 height=16 >
+           </a>
+	</td>
+        <td><input type="text" size="5" id="age" style="width: 50px;"/></td>
+      </tr>
+      <tr class="ss2ValidationRow">
+	<td colspan="2"><div id="ss2ValidationAge" style="display:none;">
+	    Age needs to be a round number between 18 and 100
+	</div></td>
+      </tr>
+      <tr class="ss2QuestionRow" style="vertical-align:top" id="crclDirectInput">
+	<td>CrCl
+           <a href='#' onMouseOver="javascript:return overlib('Creatinine Clearance should be entered in mL/min. If a calculated value is used, it should have been calculated by using the Cockroft Gault formula.', CAPTION, 'Creatinine Clearance');" onMouseOut="javascript:return nd();">
+             <img border=0 src='images/moreinfo.gif' width=16 height=16 >
+           </a>
+	</td>
+        <td>
+
+          <input type="text" size="5" id="crcl" style="width: 50px;"/>&nbsp; mL/min 
+          <!-- selecteer calculator
+          <br/>
+
+	  <input type="radio" name="crclUnity" size="5" id="crclUnityMlMin" value="mlmin" checked/> mL/min &nbsp;
+	    <input type="radio" name="crclUnity" size="5" id="crclUnityMlMin" value="xxyyy"/> mL/sec <br/>
+
+        <a href='#' onClick="toggleCalcVisibility(); return false;"> click for Cockroft Gault (calculated CrCl) </a>
+        -->
+	</td>
+      </tr>
+      <tr class="ss2ValidationRow" id="crclDirectValidation">
+	<td colspan="2"><div id="ss2ValidationCrcl" style="display:none;">
+	    CrCl is a round or fractional number. The allowed range for ml/min is 0-135. The decimal separator is a '.' (dot), e.g. 56.2
+	</div></td>
+      </tr>
+<!-- vanaf hier calculator
+-->  
+       <tr class="ss2QuestionRow" id="crclCalculatorInput" style="display: none;">
+	<td style="vertical-align: top;">CrCl
+           <a href='#' onMouseOver="javascript:return overlib('Creatinine Clearance can be entered using mL/min, mL/sec or by using the integrated Cockroft Gault calculator.', CAPTION, 'Creatinine Clearance');" onMouseOut="javascript:return nd();">
+             <img border=0 src='images/moreinfo.gif' width=16 height=16 >
+           </a>
+	</td>
+        <td>
+	  <table>
+	    <tr><td style="width: 50px;">Weight:</td>
+                <td><input type="text" size="5" id="crclCalcWeight" style="width: 50px;"/></td>
+		<td><input type="radio" size="5" name="crclCalcWeightUnity" id="crclCalcWeightUnity" value="kg" checked/> kg &nbsp; &nbsp;&nbsp; &nbsp;&nbsp;
+		    <input type="radio" size="5" name="crclCalcWeightUnity" id="crclCalcWeightUnity" value="pounds"> pounds 
+                </td>
+            </tr>
+	    <tr><td style="width: 50px;">Serum Creatinine:</td>
+                <td><input type="text"  size="5" id="crclCalcSerum" style="width: 50px;"/></td>
+                <td>	  
+		  <input type="radio" name="crclCalcSerumCUnity" size="5" id="crclCalcSerumCUnity" value="mgdl" checked/> mg/dL &nbsp;
+		  <input type="radio" name="crclCalcSerumCUnity" size="5" id="crclCalcSerumCUnity" value="mmoll"/> mmol/L <br/>
+		</td>
+	    </tr>
+            <tr>
+	      <td style="width: 50px;">Gender:</td>
+	      <td colspan="2">
+		<table><tr><td><input type="radio" name="crclCalcGender" size="5" id="crclCalcGenderMale" value="1" onclick="ss2GenMulti(1);"/></td class="ss2RadioCol1"><td>male</td>
+                    <td><input type="radio" name="crclCalcGender" size="5" id="crclCalcGenderFemale" value="0" onclick="ss2GenMulti(0);"/></td><td class="ss2RadioCol2">female</td>
+                  </tr>
+		</table>
+	      </td>
+	    </tr>
+	    <tr><td colspan="3"><br/>
+		<a href='#' onClick="toggleCalcVisibility(); return false;"> click here for CrCl direct input </a>
+		</td>
+	    </tr>
+	  </table>
+	</td>
+      </tr>
+      <tr class="ss2ValidationRow" id="crclCalculatorValidation" style="display: none;">
+	<td colspan="2"><div id="ss2ValidationCrclCalc" style="display:none;">
+	    Please check if the fields age, weight, serum creatinine and gender are filled in correctly.<br>
+	    The allowed range for weight is 30-250 kg or 66-550 pounds. The allowed range for serum creatinine is 0-10 mg/dL or 0-884 mmol/L.
+	</div></td>
+      </tr>
+<!--  tot hier calculator
+-->      
+      <tr class="ss2QuestionRow">
+	<td>LVEF (%)
+           <a href='#' onMouseOver="javascript:return overlib('Left ventricular ejection fraction taken by transthoracic echocardiography or diagnostic left ventriculography.', CAPTION, 'LVEF');" onMouseOut="javascript:return nd();">
+             <img border=0 src='images/moreinfo.gif' width=16 height=16 >
+           </a>
+	</td>
+        <td><input type="text" size="5" id="lvef" style="width: 50px;"/></td>
+      </tr>
+      <tr class="ss2ValidationRow">
+	<td colspan="2"><div id="ss2ValidationLvef" style="display:none;">
+	    LVEF is a round or fractional number between 10-75, e.g. 45.5
+	</div></td>
+      </tr>
+      <tr class="ss2QuestionRow">
+	<td>Left Main
+           <a href='#' onMouseOver="javascript:return overlib('Segment 5: From the ostium of the LCA through bifurcation into left anterior descending and left circumflex branches.', CAPTION, 'Left Main');" onMouseOut="javascript:return nd();">
+             <img border=0 src='images/moreinfo.gif' width=16 height=16 >
+           </a>
+       </td>
+        <td>
+	  <table>
+	    <tr><td><input type="radio" name="leftMain" size="5" id="leftMainNo" value="0"/></td><td class="ss2RadioCol1">no</td>
+                     <td><input type="radio" name="leftMain" size="5" id="leftMainYes" value="1"/></td><td class="ss2RadioCol2">yes</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr class="ss2ValidationRow">
+	<td colspan="2"><div id="ss2ValidationLeftMain" style="display:none;">
+	    Please select either yes or no.
+	</div></td>
+      </tr>
+      <tr class="ss2QuestionRow">
+	<td>Gender
+  
+	</td>
+        <td> 
+	  <table><tr><td><input type="radio" name="gender" size="5" id="genderMale" value="1" onclick="ss2GenMulti(1);"/></td class="ss2RadioCol1"><td>male</td>
+                     <td><input type="radio" name="gender" size="5" id="genderFemale" value="0" onclick="ss2GenMulti(0);"/></td><td class="ss2RadioCol2">female</td>
+                 </tr>
+          </table>
+	</td>
+      </tr>
+      <tr class="ss2ValidationRow">
+	<td colspan="2"><div id="ss2ValidationGender" style="display:none;">
+	    Please select if the patient is male or female.
+	</div></td>
+      </tr>
+      <tr class="ss2QuestionRow">
+	<td>COPD
+           <a href='#' onMouseOver="javascript:return overlib('Chronic obstructive pulmonary disease defined as long term use of bronchodilators or steroids for lung disease.', CAPTION, 'COPD');" onMouseOut="javascript:return nd();">
+             <img border=0 src='images/moreinfo.gif' width=16 height=16 >
+           </a>
+	</td>
+        <td>
+	  <table><tr><td><input type="radio" name="copd" size="5" id="copdNo" value="0"/></td><td class="ss2RadioCol1">no</td>
+                     <td><input type="radio" name="copd" size="5" id="copdYes" value="1"/></td><td class="ss2RadioCol2">yes</td>
+                 </tr>
+          </table>
+	</td>
+      </tr>
+      <tr class="ss2ValidationRow">
+	<td colspan="2"><div id="ss2ValidationCopd" style="display:none;">
+	    Please select either yes or no.
+	</div></td>
+      </tr>
+      <tr class="ss2QuestionRow">
+	<td>PVD
+           <a href='#' onMouseOver="javascript:return overlib('Peripheral vascular disease defined as aorta and other arteries than coronary arteries, with exercise related claudication, or reduced or absent pulsation, or angiographic stenosis of more than 50%.', CAPTION, 'PVD');" onMouseOut="javascript:return nd();">
+             <img border=0 src='images/moreinfo.gif' width=16 height=16 >
+           </a>
+	</td>
+        <td>
+	  <table><tr><td><input type="radio" name="pvd" size="5" id="pvdNo" value="0"/></td><td class="ss2RadioCol1">no</td>
+                     <td><input type="radio" name="pvd" size="5" id="pvdYes" value="1"/></td><td class="ss2RadioCol2">yes</td>
+                 </tr>
+          </table>
+	</td>
+      </tr>
+      <tr class="ss2ValidationRow">
+	<td colspan="2"><div id="ss2ValidationPvd" style="display:none;">
+	    Please select either yes or no.
+	</div></td>
+      </tr>
+      <tr>
+	<td>SYNTAX Score II</td>
+        <td><input  type="submit" value="Calculate" border="0" width="50" height="21" onClick="if( ss2QuestionsValid() ) { calcSyntaxScore2(); } else { return false; }"></td>
+      </tr>
+    </table>
+  </div>
+</BODY>
+</html>

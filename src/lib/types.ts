@@ -1,5 +1,28 @@
 export type Dominance = 'right' | 'left';
 
+export type Gender = 'male' | 'female';
+
+export interface SyntaxIIInput {
+  age: number;
+  crcl: number;       // ml/min
+  lvef: number;       // %
+  leftMainDisease: boolean;
+  gender: Gender;
+  copd: boolean;
+  pvd: boolean;
+}
+
+export interface SyntaxIIResult {
+  ss2PCI: number;
+  ss2CABG: number;
+  mortalityPCI: number;   // 4-year %, 0–100
+  mortalityCABG: number;  // 4-year %, 0–100
+  lpDelta: number;
+  seDelta: number;
+  pValue: number;
+  recommendation: 'PCI' | 'CABG' | 'equipoise';
+}
+
 export type SegmentId =
   | '1' | '2' | '3' | '4'
   | '5' | '6' | '7' | '8'
