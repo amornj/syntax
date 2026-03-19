@@ -327,12 +327,22 @@ function ResultsPanel({ result }: { result: SyntaxIIResult }) {
 
 // ── Main panel ────────────────────────────────────────────────────────────────
 
+export interface SyntaxIISharedValues {
+  age: number
+  gender: 'male' | 'female'
+  crcl: number
+  lvef: number
+  copd: boolean
+  pvd: boolean
+}
+
 interface Props {
   syntaxIScore: number
   hasLeftMainDisease: boolean
+  onValuesChange?: (values: SyntaxIISharedValues) => void
 }
 
-export function SyntaxIIPanel({ syntaxIScore, hasLeftMainDisease }: Props) {
+export function SyntaxIIPanel({ syntaxIScore, hasLeftMainDisease, onValuesChange }: Props) {
   const [age,      setAge]      = useState('65')
   const [gender,   setGender]   = useState<Gender>('male')
   const [lvef,     setLvef]     = useState('55')
@@ -355,6 +365,11 @@ export function SyntaxIIPanel({ syntaxIScore, hasLeftMainDisease }: Props) {
   const crclNum = parseFloat(crcl) || 0
 
   const isValid = ageNum >= 18 && ageNum <= 100 && lvefNum >= 10 && lvefNum <= 99 && crclNum > 0
+
+  // Report shared values to parent (for EuroSCORE II)
+  useEffect(() => {
+    onValuesChange?.({ age: ageNum, gender, crcl: crclNum, lvef: lvefNum, copd, pvd })
+  }, [ageNum, gender, crclNum, lvefNum, copd, pvd, onValuesChange])
 
   // Auto-recalculate when any input changes
   useEffect(() => {

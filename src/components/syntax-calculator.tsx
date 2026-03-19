@@ -7,7 +7,8 @@ import { getAvailableSegments } from '@/lib/segments'
 import { CoronaryDiagram } from './coronary-diagram'
 import { LesionCard } from './lesion-card'
 import { ScorePanel } from './score-panel'
-import { SyntaxIIPanel } from './syntax-ii-panel'
+import { SyntaxIIPanel, SyntaxIISharedValues } from './syntax-ii-panel'
+import { EuroScoreIIPanel } from './euroscore-ii-panel'
 
 // ── Diffuse disease (inline, simple) ─────────────────────────────────────────
 function DiffuseDisease({
@@ -132,6 +133,7 @@ export function SyntaxCalculator() {
     lesionStep: 'segments',
   })
   const hasLeftMainDisease = lesions.some(l => l.segments.includes('5'))
+  const [syntaxIIValues, setSyntaxIIValues] = useState<SyntaxIISharedValues | null>(null)
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-6 space-y-4">
@@ -253,6 +255,23 @@ export function SyntaxCalculator() {
         <SyntaxIIPanel
           syntaxIScore={syntaxIScore}
           hasLeftMainDisease={hasLeftMainDisease}
+          onValuesChange={setSyntaxIIValues}
+        />
+      </div>
+
+      {/* ── EuroSCORE II ── */}
+      <div>
+        <div className="flex items-center gap-3 mb-2">
+          <h2 className="text-sm font-semibold text-gray-600 uppercase tracking-wider">EuroSCORE II</h2>
+          <span className="text-xs text-gray-400">Cardiac surgery mortality risk</span>
+        </div>
+        <EuroScoreIIPanel
+          sharedAge={syntaxIIValues?.age}
+          sharedGender={syntaxIIValues?.gender}
+          sharedCrCl={syntaxIIValues?.crcl}
+          sharedLvef={syntaxIIValues?.lvef}
+          sharedCopd={syntaxIIValues?.copd}
+          sharedPvd={syntaxIIValues?.pvd}
         />
       </div>
 
