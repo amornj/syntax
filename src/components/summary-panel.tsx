@@ -122,6 +122,151 @@ function exportToText(props: Props): string {
   return lines.join('\n')
 }
 
+// ── HTML Export ───────────────────────────────────────────────────────────
+
+function generateHTML(props: Props): string {
+  const { syntaxIScore, hasLeftMain, syntaxIIResult, euroScoreResult, eftResult, patientAge, patientGender } = props
+  const cat = syntaxICategory(syntaxIScore)
+  const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+
+  const s2 = syntaxIIResult
+  const es = euroScoreResult
+  const ef = eftResult
+  const fl = ef ? FRAILTY_LABELS[ef.frailtyClass] : null
+
+  const recColor = s2?.recommendation === 'PCI' ? '#3b82f6' : s2?.recommendation === 'CABG' ? '#059669' : '#d97706'
+  const recBg = s2?.recommendation === 'PCI' ? '#eff6ff' : s2?.recommendation === 'CABG' ? '#ecfdf5' : '#fffbeb'
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coronary Risk Assessment Summary</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8fafc; color: #1e293b; padding: 24px; }
+  .container { max-width: 700px; margin: 0 auto; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
+  .header { background: #1e293b; color: white; padding: 20px 24px; }
+  .header h1 { font-size: 18px; font-weight: 700; }
+  .header .sub { font-size: 12px; color: #94a3b8; margin-top: 4px; }
+  .patient { padding: 12px 24px; background: #f1f5f9; font-size: 13px; color: #64748b; display: flex; gap: 16px; }
+  .patient strong { color: #1e293b; }
+  .body { padding: 20px 24px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+  .card { padding: 16px; border-radius: 12px; border: 1px solid; }
+  .card .label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+  .card .value { font-size: 28px; font-weight: 700; line-height: 1; }
+  .card .sub { font-size: 11px; color: #64748b; margin-top: 4px; }
+  .card .tag { font-size: 11px; font-weight: 600; margin-top: 4px; }
+  .c-blue { background: #eff6ff; border-color: #bfdbfe; }
+  .c-blue .label { color: #3b82f6; }
+  .c-blue .value { color: #1e40af; }
+  .c-indigo { background: #eef2ff; border-color: #c7d2fe; }
+  .c-indigo .label { color: #6366f1; }
+  .c-indigo .value { color: #3730a3; }
+  .c-rose { background: #fff1f2; border-color: #fecdd3; }
+  .c-rose .label { color: #f43f5e; }
+  .c-teal { background: #f0fdfa; border-color: #99f6e4; }
+  .c-teal .label { color: #14b8a6; }
+  .c-teal .value { color: #0f766e; }
+  .rec { padding: 14px 16px; border-radius: 12px; margin-bottom: 16px; display: flex; align-items: flex-start; gap: 10px; }
+  .rec .icon { font-size: 20px; flex-shrink: 0; }
+  .rec .title { font-size: 14px; font-weight: 700; }
+  .rec .detail { font-size: 11px; color: #64748b; margin-top: 3px; }
+  .section { margin-bottom: 14px; }
+  .section-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin-bottom: 8px; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  table th { text-align: left; padding: 6px 8px; background: #f8fafc; color: #64748b; font-weight: 600; border-bottom: 1px solid #e2e8f0; }
+  table td { padding: 6px 8px; border-bottom: 1px solid #f1f5f9; }
+  table td.val { text-align: right; font-weight: 700; }
+  .footer { padding: 16px 24px; background: #f8fafc; border-top: 1px solid #e2e8f0; }
+  .footer p { font-size: 10px; color: #94a3b8; line-height: 1.5; }
+  .green { color: #059669; } .amber { color: #d97706; } .red { color: #dc2626; }
+  @media print { body { padding: 0; background: white; } .container { box-shadow: none; } }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>📋 Coronary Risk Assessment Summary</h1>
+    <div class="sub">${date} · SYNTAX Score Calculator</div>
+  </div>
+
+  ${patientAge || patientGender ? `<div class="patient">
+    ${patientAge ? `<span>Age: <strong>${patientAge} years</strong></span>` : ''}
+    ${patientGender ? `<span>Gender: <strong>${patientGender === 'male' ? 'Male' : 'Female'}</strong></span>` : ''}
+  </div>` : ''}
+
+  <div class="body">
+    <div class="grid">
+      <div class="card c-blue">
+        <div class="label">SYNTAX Score I</div>
+        <div class="value">${formatInt(syntaxIScore)}</div>
+        <div class="tag ${cat.color.replace('text-', '')}">${cat.label} complexity</div>
+        <div class="sub">Left Main: ${hasLeftMain ? 'Yes' : 'No'}</div>
+      </div>
+
+      <div class="card c-indigo">
+        <div class="label">SYNTAX Score II</div>
+        ${s2 ? `
+        <div class="value" style="font-size:22px">${s2.recommendation === 'equipoise' ? 'Equipoise' : s2.recommendation}</div>
+        <div class="sub">PCI: ${formatPct(s2.mortalityPCI)} · CABG: ${formatPct(s2.mortalityCABG)}</div>
+        <div class="sub">4-year mortality · p=${s2.pValue < 0.001 ? '<0.001' : s2.pValue.toFixed(3)}</div>
+        ` : '<div class="sub">Not calculated</div>'}
+      </div>
+
+      <div class="card c-rose">
+        <div class="label">EuroSCORE II</div>
+        ${es ? `
+        <div class="value" style="color:${es.riskCategory === 'low' ? '#059669' : es.riskCategory === 'moderate' ? '#d97706' : '#dc2626'}">${formatPct(es.predictedMortality)}</div>
+        <div class="tag" style="color:${es.riskCategory === 'low' ? '#059669' : es.riskCategory === 'moderate' ? '#d97706' : '#dc2626'}">${euroRiskLabel(es.predictedMortality).label} risk</div>
+        <div class="sub">In-hospital mortality</div>
+        ` : '<div class="sub">Not calculated</div>'}
+      </div>
+
+      <div class="card c-teal">
+        <div class="label">Frailty (EFT)</div>
+        ${ef ? `
+        <div class="value">${ef.score}/5</div>
+        <div class="tag" style="color:${ef.frailtyClass === 'robust' ? '#059669' : ef.frailtyClass === 'prefrail' ? '#d97706' : '#dc2626'}">${fl?.label}</div>
+        <div class="sub">CABG 1yr: ${ef.mortality1yr.cabg}% · 5yr: ${ef.mortality5yr.cabg}%</div>
+        ` : '<div class="sub">Not assessed</div>'}
+      </div>
+    </div>
+
+    ${s2 ? `<div class="rec" style="background:${recBg};border:1px solid ${recColor}20">
+      <div class="icon">${s2.recommendation === 'PCI' ? '🫀' : s2.recommendation === 'CABG' ? '🔪' : '⚖️'}</div>
+      <div>
+        <div class="title" style="color:${recColor}">${s2.recommendation === 'PCI' ? 'PCI Favored' : s2.recommendation === 'CABG' ? 'CABG Favored' : 'Equipoise — Heart Team Discussion'}</div>
+        <div class="detail">
+          SYNTAX I: ${cat.label} (${formatInt(syntaxIScore)})
+          ${es ? ` · Surgical risk: ${formatPct(es.predictedMortality)}` : ''}
+          ${ef ? ` · Frailty: ${fl?.label}` : ''}
+        </div>
+        ${ef && ef.frailtyClass === 'frail' && s2.recommendation === 'CABG' ? `<div class="detail" style="color:#d97706;font-weight:600;margin-top:4px">⚠️ Patient is frail — consider impact on CABG outcomes (1-yr: ${ef.mortality1yr.cabg}%, 5-yr: ${ef.mortality5yr.cabg}%)</div>` : ''}
+      </div>
+    </div>` : ''}
+
+    ${s2 ? `<div class="section">
+      <div class="section-title">Detailed Comparison</div>
+      <table>
+        <tr><th></th><th>PCI</th><th>CABG</th></tr>
+        <tr><td>SYNTAX II Score</td><td class="val">${formatInt(s2.ss2PCI)}</td><td class="val">${formatInt(s2.ss2CABG)}</td></tr>
+        <tr><td>4-Year Mortality</td><td class="val">${formatPct(s2.mortalityPCI)}</td><td class="val">${formatPct(s2.mortalityCABG)}</td></tr>
+      </table>
+    </div>` : ''}
+  </div>
+
+  <div class="footer">
+    <p><strong>References:</strong> SYNTAX I: Sianos et al., EuroIntervention 2005 · SYNTAX II: Farooq et al., Lancet 2013 · EuroSCORE II: Nashef et al., EJCTS 2012 · EFT: Solomon et al., JAHA 2021; Afilalo et al., JACC 2017</p>
+    <p style="margin-top:6px">This report is for educational purposes only. Clinical decisions should be made by qualified healthcare professionals.</p>
+  </div>
+</div>
+</body>
+</html>`
+}
+
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export function SummaryPanel(props: Props) {
@@ -136,15 +281,43 @@ export function SummaryPanel(props: Props) {
   }
 
   const handlePrint = () => {
-    const text = exportToText(props)
+    const html = generateHTML(props)
     const win = window.open('', '_blank')
     if (!win) return
-    win.document.write(`<html><head><title>Coronary Risk Summary</title><style>
-      body { font-family: 'Courier New', monospace; font-size: 12px; padding: 40px; line-height: 1.6; white-space: pre-wrap; }
-      @media print { body { padding: 20px; } }
-    </style></head><body>${text.replace(/\n/g, '<br/>')}</body></html>`)
+    win.document.write(html)
     win.document.close()
     win.print()
+  }
+
+  const handleShareHTML = () => {
+    const html = generateHTML(props)
+    const blob = new Blob([html], { type: 'text/html' })
+    const url = URL.createObjectURL(blob)
+
+    // Try Web Share API first (mobile)
+    if (navigator.share && navigator.canShare) {
+      const file = new File([blob], 'coronary-risk-summary.html', { type: 'text/html' })
+      if (navigator.canShare({ files: [file] })) {
+        navigator.share({ files: [file], title: 'Coronary Risk Assessment Summary' }).catch(() => {
+          // Fallback: download
+          downloadBlob(blob)
+        })
+        return
+      }
+    }
+    // Fallback: download file
+    downloadBlob(blob)
+  }
+
+  const downloadBlob = (blob: Blob) => {
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'coronary-risk-summary.html'
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
   }
 
   const [copied, setCopied] = useState(false)
@@ -163,6 +336,10 @@ export function SummaryPanel(props: Props) {
           <button onClick={handleCopy}
             className="px-3 py-1.5 text-xs font-semibold bg-gray-700 hover:bg-gray-600 text-gray-200 rounded-lg transition-colors">
             {copied ? '✓ Copied' : '📋 Copy'}
+          </button>
+          <button onClick={handleShareHTML}
+            className="px-3 py-1.5 text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg transition-colors">
+            📤 HTML
           </button>
           <button onClick={handlePrint}
             className="px-3 py-1.5 text-xs font-semibold bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors">
