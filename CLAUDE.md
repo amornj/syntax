@@ -1,201 +1,160 @@
-# SYNTAX Score Calculator — Build Spec
+# SYNTAX Score Calculator — Developer Reference
 
-## Overview
-A modern webapp to calculate the SYNTAX I Score — an angiographic tool grading the complexity of coronary artery disease. This replaces the painful multi-page wizard at syntaxscore.org with a **single-page, fast, modern UI** that a cardiologist can complete in under 2 minutes instead of 5-10.
+## Project Overview
+
+A single-page, client-side web application for comprehensive coronary revascularization risk assessment. It integrates five linked calculators that a cardiologist can complete in under 2 minutes per case. Deployed at https://syntax-azure.vercel.app.
+
+**GitHub:** github.com/amornj/syntax
 
 ## Tech Stack
-- **Next.js 15** (App Router)
+
+- **Next.js 16** (App Router, `next: 16.1.6`)
+- **React 19** (`react: 19.2.3`)
 - **TypeScript** (strict)
 - **Tailwind CSS v4**
-- **shadcn/ui** components
+- **shadcn/ui** components (base-ui/react)
 - No backend — pure client-side calculation
-- Deploy to Vercel
+- Deployed on Vercel
 
-## ⚡ UX PHILOSOPHY: SPEED OVER WIZARDS
+## Development Commands
 
-The #1 pain point of syntaxscore.org is: **too many clicks, too many pages, 5-10 minutes per case.**
-
-Our design principle: **SINGLE PAGE, ALL VISIBLE, MINIMUM CLICKS.**
-
-### Design Rules:
-1. **No wizard/multi-step flow** — everything on ONE page with expandable sections
-2. **Dominance toggle** at the top (2 buttons, done in 1 click)
-3. **Add lesion = one button** → inline expandable card appears with ALL options visible at once
-4. **Segment selection** via clickable coronary diagram OR quick-select buttons (grouped by vessel)
-5. **Adverse features** = toggle switches/checkboxes, all visible at once (no next/back)
-6. **Bifurcation type** = visual diagram with clickable types (Medina pattern, 1 click)
-7. **Running score** always visible in sticky sidebar
-8. **Diffuse disease** = segment multi-select at the bottom
-9. Target: **complete a 3-vessel disease case in <2 minutes**
-
-## SYNTAX Score Algorithm (MUST BE EXACT)
-
-The SYNTAX score is **lesion-based**. Each lesion ≥50% diameter stenosis in vessels ≥1.5mm is scored separately. Total SYNTAX score = sum of all individual lesion scores + diffuse disease points.
-
-### Coronary Dominance (toggle at top)
-- **Right dominant** (default, ~85%)
-- **Left dominant** (~15%)
-This changes segment weighting factors.
-
-### 16-Segment Coronary Tree (AHA modified for ARTS)
-
-| Seg | Name | Right Dom | Left Dom |
-|-----|------|-----------|----------|
-| 1 | RCA proximal | 1.0 | 0 |
-| 2 | RCA mid | 1.0 | 0 |
-| 3 | RCA distal | 1.0 | 0 |
-| 4 | PDA (from RCA) | 1.0 | — |
-| 5 | Left Main | 5.0 | 6.0 |
-| 6 | LAD proximal | 3.5 | 3.5 |
-| 7 | LAD mid | 2.5 | 2.5 |
-| 8 | LAD apical | 1.0 | 1.0 |
-| 9 | First Diagonal (D1) | 1.0 | 1.0 |
-| 9a | First Diagonal a | 1.0 | 1.0 |
-| 10 | Second Diagonal (D2) | 0.5 | 0.5 |
-| 10a | Second Diagonal a | 0.5 | 0.5 |
-| 11 | Proximal LCx | 1.5 | 2.5 |
-| 12 | Intermediate/Anterolateral | 1.0 | 1.0 |
-| 12a | Obtuse Marginal a (OM1) | 1.0 | 1.0 |
-| 12b | Obtuse Marginal b (OM2) | 1.0 | 1.0 |
-| 13 | Distal LCx | 0.5 | 1.5 |
-| 14 | Left Posterolateral | 0.5 | 1.0 |
-| 14a | Left Posterolateral a | 0.5 | 1.0 |
-| 14b | Left Posterolateral b | 0.5 | 1.0 |
-| 15 | PDA (from LCx, left dom only) | — | 1.0 |
-| 16 | Posterolateral from RCA | 0.5 | — |
-| 16a | Posterolateral a from RCA | 0.5 | — |
-| 16b | Posterolateral b from RCA | 0.5 | — |
-| 16c | Posterolateral c from RCA | 0.5 | — |
-
-### Lesion Base Score
-```
-Base Score = (Sum of segment weights) × Multiplication Factor
-```
-- **Non-occlusive (50-99%):** × 2
-- **Total occlusion (100%):** × 5
-
-### Adverse Characteristics (ADDITIVE points per lesion)
-
-#### Total Occlusion sub-features (only if 100%):
-| Feature | Points |
-|---------|--------|
-| Age >3 months or unknown | +1 |
-| Blunt stump | +1 |
-| Bridging collaterals | +1 |
-| Side branch ≥1.5mm | +1 per branch |
-| First segment beyond TO | +1 per additional segment |
-
-#### Trifurcation:
-| Diseased segments | Points |
-|-------------------|--------|
-| 1 segment | +3 |
-| 2 segments | +4 |
-| 3 segments | +5 |
-| 4 segments | +6 |
-
-Valid locations: 5/6/11/12, 3/4/16/16a, 6/7/9/9a, 7/8/10/10a, 11/13/12a/12b
-
-#### Bifurcation (Medina):
-| Type | Points |
-|------|--------|
-| A (1,0,0) / B (0,1,0) / C (1,1,0) | +1 |
-| D (1,1,1) / E (0,0,1) / F (1,0,1) / G (0,1,1) | +2 |
-| Angulation <70° | additional +1 |
-
-Valid locations: 5/6/11, 6/7/9, 7/8/10, 11/13/12a, 13/14/14a, 3/4/16, 13/14/15 (left dom)
-
-#### Other features:
-| Feature | Points |
-|---------|--------|
-| Aorto-ostial (seg 1, 5, or 6/11 if no LM) | +1 |
-| Severe tortuosity | +2 |
-| Length >20mm | +1 |
-| Heavy calcification | +2 |
-| Thrombus | +1 |
-
-### Diffuse Disease/Small Vessels (ONCE per patient)
-- ≥75% of segment length has vessel <2mm
-- +1 point per affected segment
-
-### Interpretation
-| Score | Tertile | Recommendation |
-|-------|---------|----------------|
-| 0–22 | Low | PCI reasonable |
-| 23–32 | Intermediate | Heart Team discussion |
-| ≥33 | High | CABG preferred |
-
-## UI Layout (Single Page)
-
-```
-┌─────────────────────────────────────────────────────────┐
-│ SYNTAX Score Calculator            [Right ◉] [○ Left]   │
-├────────────────────────────────┬────────────────────────┤
-│                                │                        │
-│  CORONARY DIAGRAM (SVG)        │  SCORE PANEL (sticky)  │
-│  - 16 segments, clickable      │  ┌──────────────────┐  │
-│  - Color per lesion             │  │ SYNTAX Score: 28 │  │
-│  - Dominance-aware              │  │ ■ Intermediate   │  │
-│                                │  │ Heart Team Disc. │  │
-│  [Seg buttons: RCA | LAD |     │  ├──────────────────┤  │
-│   LCx | Other]                 │  │ Lesion 1: 14     │  │
-│                                │  │ Lesion 2: 7      │  │
-│                                │  │ Lesion 3: 5      │  │
-│                                │  │ Diffuse: 2       │  │
-│                                │  └──────────────────┘  │
-├────────────────────────────────┴────────────────────────┤
-│  LESIONS                                   [+ Add Lesion]│
-│  ┌──────────────────────────────────────────────────────┐│
-│  │ Lesion 1 (●) Seg 5,6 | Non-occlusive        Score:14││
-│  │ ┌─────────────────────────────────────────────────┐  ││
-│  │ │ Segments: [5 LM ✓] [6 pLAD ✓] [7] [8] ...     │  ││
-│  │ │ Occlusion: [◉ 50-99%] [○ 100%]                 │  ││
-│  │ │ Bifurcation: [✓] Type: [D ●] Angle<70°: [✓]    │  ││
-│  │ │ Trifurcation: [ ] Diseased segs: [1][2][3][4]   │  ││
-│  │ │ ┌──── Other Features ────────────────────┐      │  ││
-│  │ │ │ [✓] Heavy calcification (+2)           │      │  ││
-│  │ │ │ [ ] Aorto-ostial (+1)                  │      │  ││
-│  │ │ │ [ ] Severe tortuosity (+2)             │      │  ││
-│  │ │ │ [ ] Length >20mm (+1)                  │      │  ││
-│  │ │ │ [ ] Thrombus (+1)                      │      │  ││
-│  │ │ └────────────────────────────────────────┘      │  ││
-│  │ └─────────────────────────────────────────────────┘  ││
-│  └──────────────────────────────────────────────────────┘│
-│  ┌──────────────────────────────────────────────────────┐│
-│  │ Lesion 2 (●) Seg 2 | Total Occlusion        Score: 7││
-│  │ [collapsed — click to expand]                        ││
-│  └──────────────────────────────────────────────────────┘│
-│                                                          │
-│  DIFFUSE DISEASE / SMALL VESSELS                         │
-│  Select segments: [1][ ][3][ ][ ][6][ ][ ]...    +2 pts │
-│                                                          │
-│  ┌──────────────────────────────────────────────────────┐│
-│  │ [Export Report]  [Reset All]  [Reference Tables ▼]   ││
-│  └──────────────────────────────────────────────────────┘│
-└──────────────────────────────────────────────────────────┘
+```bash
+npm install
+npm run dev      # http://localhost:3000
+npm run build
+npm run lint
 ```
 
-### Key UX Patterns:
-1. **Lesion cards** — each lesion is an expandable card. Latest one auto-expands. Click header to collapse/expand.
-2. **Segment selection** — dual mode: click on diagram OR click segment buttons (grouped by vessel). Both update simultaneously.
-3. **Toggle switches** for all yes/no features (not dropdowns or radio pages)
-4. **Bifurcation type** — show small Medina diagrams (3 circles: proximal, distal, side branch) as clickable buttons. User picks visually in 1 click.
-5. **Total occlusion details** — only appear when "100% Total Occlusion" is selected (smooth expand animation)
-6. **Trifurcation details** — only appear when trifurcation toggle is on
-7. **Score updates in real-time** as user toggles any option
-8. **Color system** — each lesion gets a distinct color, shown on diagram and in score panel
-9. **Mobile:** stack diagram above score panel, lesion cards full-width
+## Architecture
 
-## Validation Test Cases
-1. Single proximal LAD non-occlusive → 3.5 × 2 = **7.0**
-2. LM/LAD bifurcation (seg 5+6), non-occlusive, Medina D (1,1,1) → (5+3.5)×2 + 2 = **19.0**
-3. CTO RCA mid (seg 2), age >3mo, blunt stump → 1×5 + 1 + 1 = **7.0**
-4. LM trifurcation (seg 5,6,11,12), 4 diseased, non-occlusive → (5+3.5+1.5+1)×2 + 6 = **28.0**
+### Source Structure
+
+```
+src/
+├── app/
+│   ├── layout.tsx           # Root layout
+│   ├── page.tsx             # Entry point — renders <SyntaxCalculator />
+│   └── globals.css
+├── components/
+│   ├── syntax-calculator.tsx   # ROOT component — orchestrates all state + sections
+│   ├── coronary-diagram.tsx    # SVG interactive 16-segment coronary diagram
+│   ├── lesion-card.tsx         # Per-lesion expandable card (segments, features)
+│   ├── score-panel.tsx         # Sticky live SYNTAX I score display
+│   ├── syntax-ii-panel.tsx     # SYNTAX II inputs + result + shared param emission
+│   ├── euroscore-ii-panel.tsx  # EuroSCORE II inputs + result
+│   ├── eft-panel.tsx           # Essential Frailty Toolset inputs + result
+│   ├── summary-panel.tsx       # 4-card risk summary + Copy/HTML/Print export
+│   └── ui/                     # shadcn/ui primitives (badge, button, card, etc.)
+└── lib/
+    ├── types.ts                # All shared TypeScript types and interfaces
+    ├── segments.ts             # 16-segment definitions + dominance-aware weights
+    ├── syntax-score.ts         # SYNTAX I calculation engine
+    ├── syntax-score-ii.ts      # SYNTAX II calculation (Farooq 2013 coefficients)
+    ├── euroscore-ii.ts         # EuroSCORE II calculation (Nashef 2012, validated)
+    ├── eft-score.ts            # Essential Frailty Toolset scoring
+    └── utils.ts                # Tailwind class merge utility
+```
+
+### Component Hierarchy
+
+```
+page.tsx
+└── SyntaxCalculator          ← single source of truth for all state
+    ├── CoronaryDiagram       ← reads lesions[], activeLesionId
+    ├── ScorePanel            ← reads lesions[], diffuseCount (sticky)
+    ├── LesionCard[]          ← per-lesion state via onUpdate callback
+    ├── DiffuseDisease        ← inline component in syntax-calculator.tsx
+    ├── SyntaxIIPanel         ← emits SyntaxIISharedValues upward via onValuesChange
+    ├── EuroScoreIIPanel      ← receives shared params as props (age, gender, CrCl, LVEF, COPD, PVD)
+    ├── EFTPanel              ← receives sharedGender prop
+    └── SummaryPanel          ← receives all four results + patient demographics
+```
+
+## The Five Sections
+
+### 1. SYNTAX Score I (`syntax-score.ts`, `segments.ts`)
+
+Anatomical lesion complexity scoring per the AHA 16-segment model.
+
+- Each lesion ≥50% in vessels ≥1.5mm is scored: `(sum of segment weights) × multiplication factor`
+- Non-occlusive (50–99%): ×2; Total occlusion (100%): ×5
+- Adverse characteristics add points: bifurcation (+1/+2), trifurcation (+3–6), heavy calcification (+2), severe tortuosity (+2), aorto-ostial (+1), length >20mm (+1), thrombus (+1)
+- Total occlusion sub-features: age >3mo/unknown (+1), blunt stump (+1), bridging collaterals (+1), side branches (+1 each), segments beyond TO (+1 each)
+- Diffuse disease: +1 per segment with ≥75% of length <2mm vessel
+
+**Interpretation:** Low ≤22, Intermediate 23–32, High ≥33
+
+### 2. SYNTAX Score II (`syntax-score-ii.ts`)
+
+Clinical prediction of 4-year PCI vs CABG mortality (Farooq et al., Lancet 2013).
+
+- Inputs: SYNTAX I score, age, gender, CrCl (Cockcroft-Gault), LVEF, COPD, PVD, left main disease
+- Outputs: SS2-PCI, SS2-CABG, predicted 4-year mortality % for each
+- Validated against syntaxscore.org with exact published coefficients
+
+### 3. EuroSCORE II (`euroscore-ii.ts`)
+
+In-hospital cardiac surgery mortality (Nashef et al., EJCTS 2012). 18 variables.
+
+- Validated against the official euroscore.org JavaScript source code
+- Shared variables received as props from SYNTAX II
+
+### 4. Essential Frailty Toolset (`eft-score.ts`)
+
+Preoperative frailty assessment (Solomon et al. JAHA 2021; Afilalo et al. JACC 2017).
+
+- 4 components: chair stands test, cognitive impairment, hemoglobin, albumin
+- Output: Robust / Pre-Frail / Frail
+
+### 5. Risk Assessment Summary (`summary-panel.tsx`)
+
+- 4-card grid aggregating all results
+- Decision guidance (PCI vs CABG recommendation)
+- Export: plain-text Copy, self-contained HTML file, Print
+
+## Key Implementation Notes
+
+### Shared Parameter Flow
+
+`SyntaxIIPanel` emits a `SyntaxIISharedValues` object (`age`, `gender`, `crcl`, `lvef`, `copd`, `pvd`) via the `onValuesChange` callback. `SyntaxCalculator` holds this in state and passes the values as individual props to `EuroScoreIIPanel` and `sharedGender` to `EFTPanel`. This means the user only enters demographic/clinical variables once.
+
+### Left Main Auto-Sync
+
+`hasLeftMainDisease` is derived in `SyntaxCalculator` by checking whether any lesion includes segment `'5'`:
+
+```ts
+const hasLeftMainDisease = lesions.some(l => l.segments.includes('5'))
+```
+
+This boolean is passed into `SyntaxIIPanel` so the Left Main Disease toggle auto-populates from SYNTAX I. The panel supports a manual override with a warning displayed when the auto-detected value and user override differ.
+
+### Dominance-Aware Segment Weights
+
+`segments.ts` exports `getAvailableSegments(dominance)` which returns the correct set of segments and weights for right vs left dominant systems. Right dominant exposes RCA territory (segs 1–4, 16x); left dominant exposes seg 15 (PDA from LCx) and different LCx weights.
+
+### Validation
+
+- SYNTAX II: coefficients matched exactly to Farooq et al. 2013 supplementary appendix and verified against syntaxscore.org output
+- EuroSCORE II: algorithm validated against the official euroscore.org JavaScript source (Nashef et al. 2012)
+
+### Real-Time Calculation
+
+All scores recalculate on every state change — no submit button. `calculateLesionScore()` and `calculateTotalScore()` are called inline during render. `ScorePanel` is sticky (`lg:sticky lg:top-4`) so the running score is always visible.
+
+## Types Reference (`types.ts`)
+
+Key interfaces:
+- `Lesion` — id, color, segments[], occlusionType, totalOcclusionDetails, bifurcation, trifurcation, adverseFeatures, score
+- `SyntaxIIInput` — age, crcl, lvef, leftMainDisease, gender, copd, pvd
+- `SyntaxIIResult` — ss2PCI, ss2CABG, mortalityPCI, mortalityCABG, recommendation
+- `SyntaxState` — dominance, lesions, diffuseDiseaseSegments, currentStep, editingLesionId, lesionStep
+- `SegmentId` — union type of all 24 segment string IDs ('1'–'16c')
 
 ## References
-1. Sianos G, et al. The SYNTAX Score. EuroIntervention. 2005;1:219-227.
-2. Serruys PW, et al. PCI vs CABG. N Engl J Med. 2009;360:961-972.
-3. syntaxscore.org
-4. Leaman DM, et al. Circulation. 1981;63:285-299.
 
-## EXISTING CODE
-Silver already created segments.ts and types.ts in src/lib/ — USE THEM as-is, they are correct. Build the rest of the components on top.
+1. Sianos G, et al. The SYNTAX Score. *EuroIntervention.* 2005;1:219-227.
+2. Farooq V, et al. Anatomical and clinical characteristics to guide decision making between coronary artery bypass surgery and percutaneous coronary intervention for individual patients: development and validation of SYNTAX score II. *Lancet.* 2013;381:639-650.
+3. Nashef SAM, et al. EuroSCORE II. *Eur J Cardiothorac Surg.* 2012;41:734-745.
+4. Solomon A, et al. Essential Frailty Toolset. *J Am Heart Assoc.* 2021.
+5. Afilalo J, et al. Frailty in Older Adults Undergoing Aortic Valve Replacement. *J Am Coll Cardiol.* 2017;70:689-700.
+6. Leaman DM, et al. *Circulation.* 1981;63:285-299.
