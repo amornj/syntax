@@ -9,6 +9,7 @@ import { LesionCard } from './lesion-card'
 import { ScorePanel } from './score-panel'
 import { SyntaxIIPanel, SyntaxIISharedValues } from './syntax-ii-panel'
 import { EuroScoreIIPanel } from './euroscore-ii-panel'
+import { EFTPanel } from './eft-panel'
 
 // ── Diffuse disease (inline, simple) ─────────────────────────────────────────
 function DiffuseDisease({
@@ -273,6 +274,15 @@ export function SyntaxCalculator() {
           sharedCopd={syntaxIIValues?.copd}
           sharedPvd={syntaxIIValues?.pvd}
         />
+      </div>
+
+      {/* ── Essential Frailty Toolset ── */}
+      <div>
+        <div className="flex items-center gap-3 mb-2">
+          <h2 className="text-sm font-semibold text-gray-600 uppercase tracking-wider">Essential Frailty Toolset</h2>
+          <span className="text-xs text-gray-400">Preoperative frailty assessment</span>
+        </div>
+        <EFTPanel sharedGender={syntaxIIValues?.gender} />
       </div>
 
       {/* ── Footer ── */}
