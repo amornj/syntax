@@ -338,16 +338,17 @@ export function SyntaxIIPanel({ syntaxIScore, hasLeftMainDisease }: Props) {
   const [lvef,     setLvef]     = useState('55')
   const [crcl,     setCrcl]     = useState('70')
   const [leftMain, setLeftMain] = useState(hasLeftMainDisease)
+  const [leftMainOverride, setLeftMainOverride] = useState(false)
+  const [showLMWarning, setShowLMWarning] = useState<boolean | null>(null)
   const [copd,     setCopd]     = useState(false)
   const [pvd,      setPvd]      = useState(false)
   const [showCG,   setShowCG]   = useState(false)
   const [result,   setResult]   = useState<SyntaxIIResult | null>(null)
 
-  // Sync left main from SYNTAX I only when it becomes true (segment 5 added)
-  // Don't override user's manual "Yes" toggle when SYNTAX I says false
+  // Always sync Left Main from SYNTAX I unless user has manually overridden
   useEffect(() => {
-    if (hasLeftMainDisease) setLeftMain(true)
-  }, [hasLeftMainDisease])
+    if (!leftMainOverride) setLeftMain(hasLeftMainDisease)
+  }, [hasLeftMainDisease, leftMainOverride])
 
   const ageNum  = parseInt(age)  || 0
   const lvefNum = parseInt(lvef) || 0
@@ -422,9 +423,19 @@ export function SyntaxIIPanel({ syntaxIScore, hasLeftMainDisease }: Props) {
             </FormRow>
             <FormRow
               label="Left Main"
-              hint={hasLeftMainDisease ? '(auto: seg 5)' : undefined}
+              hint={leftMainOverride
+                ? '(manual override)'
+                : hasLeftMainDisease ? '(auto: seg 5 ✓)' : '(auto: seg 5 ✗)'}
             >
-              <BoolToggle value={leftMain} onChange={setLeftMain} />
+              <BoolToggle value={leftMain} onChange={(v) => {
+                if (v !== hasLeftMainDisease) {
+                  setShowLMWarning(v)
+                } else {
+                  // Going back to match SYNTAX I — clear override
+                  setLeftMainOverride(false)
+                  setLeftMain(v)
+                }
+              }} />
             </FormRow>
           </div>
         </div>
@@ -451,6 +462,51 @@ export function SyntaxIIPanel({ syntaxIScore, hasLeftMainDisease }: Props) {
             onApply={v => { setCrcl(String(v)); setShowCG(false) }}
             onClose={() => setShowCG(false)}
           />
+        )}
+
+        {/* Left Main override warning */}
+        {showLMWarning !== null && (
+          <div className="mt-2 p-3 rounded-xl bg-amber-50 border border-amber-200">
+            <p className="text-xs font-bold text-amber-800 mb-1">⚠️ Override Left Main?</p>
+            <p className="text-xs text-amber-700 mb-3">
+              {showLMWarning
+                ? 'SYNTAX I does not have segment 5 (Left Main) selected as diseased. Are you sure you want to set Left Main to Yes?'
+                : 'SYNTAX I has segment 5 (Left Main) selected as diseased. Are you sure you want to set Left Main to No?'}
+            </p>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setLeftMain(showLMWarning)
+                  setLeftMainOverride(true)
+                  setShowLMWarning(null)
+                }}
+                className="px-3 py-1.5 text-xs font-semibold bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors"
+              >
+                Yes, override
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowLMWarning(null)}
+                className="px-3 py-1.5 text-xs font-semibold bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition-colors"
+              >
+                Cancel
+              </button>
+              {leftMainOverride && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLeftMainOverride(false)
+                    setLeftMain(hasLeftMainDisease)
+                    setShowLMWarning(null)
+                  }}
+                  className="px-3 py-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition-colors"
+                >
+                  Reset to SYNTAX I
+                </button>
+              )}
+            </div>
+          </div>
         )}
 
         {/* Calculate button */}
