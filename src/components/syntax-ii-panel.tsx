@@ -340,9 +340,10 @@ interface Props {
   syntaxIScore: number
   hasLeftMainDisease: boolean
   onValuesChange?: (values: SyntaxIISharedValues) => void
+  onResultChange?: (result: SyntaxIIResult | null) => void
 }
 
-export function SyntaxIIPanel({ syntaxIScore, hasLeftMainDisease, onValuesChange }: Props) {
+export function SyntaxIIPanel({ syntaxIScore, hasLeftMainDisease, onValuesChange, onResultChange }: Props) {
   const [age,      setAge]      = useState('65')
   const [gender,   setGender]   = useState<Gender>('male')
   const [lvef,     setLvef]     = useState('55')
@@ -373,12 +374,14 @@ export function SyntaxIIPanel({ syntaxIScore, hasLeftMainDisease, onValuesChange
 
   // Auto-recalculate when any input changes
   useEffect(() => {
-    if (!isValid) { setResult(null); return }
+    if (!isValid) { setResult(null); onResultChange?.(null); return }
     const input: SyntaxIIInput = {
       age: ageNum, crcl: crclNum, lvef: lvefNum,
       leftMainDisease: leftMain, gender, copd, pvd,
     }
-    setResult(calculateSyntaxII(syntaxIScore, input))
+    const r = calculateSyntaxII(syntaxIScore, input)
+    setResult(r)
+    onResultChange?.(r)
   }, [syntaxIScore, ageNum, crclNum, lvefNum, leftMain, gender, copd, pvd, isValid])
 
   const handleCalculate = () => {

@@ -139,9 +139,10 @@ function ResultsPanel({ result }: { result: EFTResult }) {
 
 interface Props {
   sharedGender?: 'male' | 'female'
+  onResultChange?: (result: EFTResult) => void
 }
 
-export function EFTPanel({ sharedGender }: Props) {
+export function EFTPanel({ sharedGender, onResultChange }: Props) {
   const [gender, setGender] = useState<'male' | 'female'>(sharedGender || 'male')
   const [chairTime, setChairTime] = useState('')
   const [chairUnable, setChairUnable] = useState(false)
@@ -170,6 +171,9 @@ export function EFTPanel({ sharedGender }: Props) {
       albumin: albNum,
     })
   }, [gender, chairTimeNum, chairUnable, cognitive, hgbNum, albNum])
+
+  // Report result to parent
+  useEffect(() => { onResultChange?.(result) }, [result])
 
   return (
     <div className="rounded-xl border border-teal-200 bg-white overflow-hidden">

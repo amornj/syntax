@@ -144,10 +144,11 @@ interface Props {
   sharedLvef?: number
   sharedCopd?: boolean
   sharedPvd?: boolean
+  onResultChange?: (result: EuroScoreIIResult | null) => void
 }
 
 export function EuroScoreIIPanel({
-  sharedAge, sharedGender, sharedCrCl, sharedLvef, sharedCopd, sharedPvd,
+  sharedAge, sharedGender, sharedCrCl, sharedLvef, sharedCopd, sharedPvd, onResultChange,
 }: Props) {
   // Patient factors
   const [age, setAge]           = useState(sharedAge?.toString() || '65')
@@ -215,6 +216,9 @@ export function EuroScoreIIPanel({
   }, [ageNum, gender, iddm, copd, poorMobility, crclNum, dialysis, critical,
       nyha, ccs4, pvd, prevSurgery, endocarditis, lvefNum, recentMI, paPressure,
       urgency, procedureWeight, thoracicAorta])
+
+  // Report result to parent
+  useEffect(() => { onResultChange?.(result) }, [result])
 
   // Derived labels for synced fields
   const renalCat = renalCategoryFromCrCl(crclNum, dialysis)

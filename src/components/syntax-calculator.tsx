@@ -10,6 +10,10 @@ import { ScorePanel } from './score-panel'
 import { SyntaxIIPanel, SyntaxIISharedValues } from './syntax-ii-panel'
 import { EuroScoreIIPanel } from './euroscore-ii-panel'
 import { EFTPanel } from './eft-panel'
+import { SummaryPanel } from './summary-panel'
+import { SyntaxIIResult } from '@/lib/types'
+import { EuroScoreIIResult } from '@/lib/euroscore-ii'
+import { EFTResult } from '@/lib/eft-score'
 
 // ── Diffuse disease (inline, simple) ─────────────────────────────────────────
 function DiffuseDisease({
@@ -135,6 +139,9 @@ export function SyntaxCalculator() {
   })
   const hasLeftMainDisease = lesions.some(l => l.segments.includes('5'))
   const [syntaxIIValues, setSyntaxIIValues] = useState<SyntaxIISharedValues | null>(null)
+  const [syntaxIIResult, setSyntaxIIResult] = useState<SyntaxIIResult | null>(null)
+  const [euroScoreResult, setEuroScoreResult] = useState<EuroScoreIIResult | null>(null)
+  const [eftResult, setEftResult] = useState<EFTResult | null>(null)
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-6 space-y-4">
@@ -257,6 +264,7 @@ export function SyntaxCalculator() {
           syntaxIScore={syntaxIScore}
           hasLeftMainDisease={hasLeftMainDisease}
           onValuesChange={setSyntaxIIValues}
+          onResultChange={setSyntaxIIResult}
         />
       </div>
 
@@ -273,6 +281,7 @@ export function SyntaxCalculator() {
           sharedLvef={syntaxIIValues?.lvef}
           sharedCopd={syntaxIIValues?.copd}
           sharedPvd={syntaxIIValues?.pvd}
+          onResultChange={setEuroScoreResult}
         />
       </div>
 
@@ -282,8 +291,19 @@ export function SyntaxCalculator() {
           <h2 className="text-sm font-semibold text-gray-600 uppercase tracking-wider">Essential Frailty Toolset</h2>
           <span className="text-xs text-gray-400">Preoperative frailty assessment</span>
         </div>
-        <EFTPanel sharedGender={syntaxIIValues?.gender} />
+        <EFTPanel sharedGender={syntaxIIValues?.gender} onResultChange={setEftResult} />
       </div>
+
+      {/* ── Summary ── */}
+      <SummaryPanel
+        syntaxIScore={syntaxIScore}
+        hasLeftMain={hasLeftMainDisease}
+        syntaxIIResult={syntaxIIResult}
+        euroScoreResult={euroScoreResult}
+        eftResult={eftResult}
+        patientAge={syntaxIIValues?.age}
+        patientGender={syntaxIIValues?.gender}
+      />
 
       {/* ── Footer ── */}
       <div className="flex items-center justify-between pt-3 border-t border-gray-100">
