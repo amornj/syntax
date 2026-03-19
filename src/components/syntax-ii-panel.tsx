@@ -343,14 +343,27 @@ export function SyntaxIIPanel({ syntaxIScore, hasLeftMainDisease }: Props) {
   const [showCG,   setShowCG]   = useState(false)
   const [result,   setResult]   = useState<SyntaxIIResult | null>(null)
 
-  // Keep left main in sync with SYNTAX I lesion changes
-  useEffect(() => { setLeftMain(hasLeftMainDisease) }, [hasLeftMainDisease])
+  // Sync left main from SYNTAX I only when it becomes true (segment 5 added)
+  // Don't override user's manual "Yes" toggle when SYNTAX I says false
+  useEffect(() => {
+    if (hasLeftMainDisease) setLeftMain(true)
+  }, [hasLeftMainDisease])
 
   const ageNum  = parseInt(age)  || 0
   const lvefNum = parseInt(lvef) || 0
   const crclNum = parseFloat(crcl) || 0
 
   const isValid = ageNum >= 18 && ageNum <= 100 && lvefNum >= 10 && lvefNum <= 99 && crclNum > 0
+
+  // Auto-recalculate when any input changes
+  useEffect(() => {
+    if (!isValid) { setResult(null); return }
+    const input: SyntaxIIInput = {
+      age: ageNum, crcl: crclNum, lvef: lvefNum,
+      leftMainDisease: leftMain, gender, copd, pvd,
+    }
+    setResult(calculateSyntaxII(syntaxIScore, input))
+  }, [syntaxIScore, ageNum, crclNum, lvefNum, leftMain, gender, copd, pvd, isValid])
 
   const handleCalculate = () => {
     if (!isValid) return
