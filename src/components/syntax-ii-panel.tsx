@@ -217,105 +217,33 @@ function ResultsPanel({ result }: { result: SyntaxIIResult }) {
   const fmt0  = (n: number) => Math.round(n).toString()
   const fmtP  = (p: number) => p < 0.001 ? '<0.001' : p.toFixed(3)
 
-  const maxM  = Math.max(mortalityPCI, mortalityCABG)
-  const scale = maxM > 0 ? 80 / maxM : 1
-
-  const pciWins  = mortalityPCI  < mortalityCABG
-  const cabgWins = mortalityCABG < mortalityPCI
-  const sigDiff  = pValue < 0.05
-
   return (
     <div className="p-4 border-t border-indigo-100 bg-gradient-to-b from-indigo-50/20 to-white">
       <p className="text-xs font-bold text-indigo-500 uppercase tracking-wide mb-3">
-        Predicted 4-Year Outcomes
+        SYNTAX II
       </p>
 
-      {/* Side-by-side cards */}
       <div className="grid grid-cols-2 gap-3 mb-4">
         {[
-          { label: 'PCI',  mortality: mortalityPCI,  ss2: ss2PCI,  better: pciWins  },
-          { label: 'CABG', mortality: mortalityCABG, ss2: ss2CABG, better: cabgWins },
-        ].map(({ label, mortality, ss2, better }) => (
+          { label: 'PCI',  mortality: mortalityPCI,  ss2: ss2PCI },
+          { label: 'CABG', mortality: mortalityCABG, ss2: ss2CABG },
+        ].map(({ label, mortality, ss2 }) => (
           <div
             key={label}
-            className={`rounded-xl p-3 border-2 transition-all ${
-              better
-                ? 'bg-emerald-50 border-emerald-200'
-                : 'bg-gray-50 border-gray-200'
-            }`}
+            className="rounded-xl p-3 border-2 border-gray-200 bg-gray-50 transition-all"
           >
             <div className="flex items-center justify-between mb-1.5">
               <span className="text-xs font-bold text-gray-500 uppercase tracking-wide">{label}</span>
-              {better && recommendation !== 'equipoise' && (
-                <span className="text-xs px-1.5 py-0.5 bg-emerald-100 text-emerald-700 rounded-full font-bold">
-                  Favored
-                </span>
-              )}
             </div>
-            <div className={`text-3xl font-bold tabular-nums leading-none ${better ? 'text-emerald-600' : 'text-gray-400'}`}>
+            <div className="text-3xl font-bold tabular-nums leading-none text-gray-700">
               {fmt1(mortality)}%
             </div>
             <div className="text-xs text-gray-400 mt-0.5 mb-2">4-yr mortality</div>
-            <div className={`text-xs font-semibold ${better ? 'text-emerald-500' : 'text-gray-400'}`}>
+            <div className="text-xs font-semibold text-gray-400">
               SS2 score = {fmt0(ss2)}
             </div>
           </div>
         ))}
-      </div>
-
-      {/* Bar comparison */}
-      <div className="space-y-1.5 mb-4">
-        {[
-          { label: 'PCI',  value: mortalityPCI,  better: pciWins  },
-          { label: 'CABG', value: mortalityCABG, better: cabgWins },
-        ].map(({ label, value, better }) => (
-          <div key={label} className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-gray-400 w-8">{label}</span>
-            <div className="flex-1 h-4 bg-gray-100 rounded-full overflow-hidden">
-              <div
-                className={`h-full rounded-full transition-all duration-500 ${better ? 'bg-emerald-400' : 'bg-gray-300'}`}
-                style={{ width: `${value * scale}%` }}
-              />
-            </div>
-            <span className={`text-xs font-bold tabular-nums w-10 text-right ${better ? 'text-emerald-600' : 'text-gray-400'}`}>
-              {fmt1(value)}%
-            </span>
-          </div>
-        ))}
-      </div>
-
-      {/* Recommendation box */}
-      <div className={`rounded-xl px-3.5 py-2.5 border ${
-        recommendation === 'equipoise'
-          ? 'bg-amber-50 border-amber-200'
-          : 'bg-emerald-50 border-emerald-200'
-      }`}>
-        <div className="flex items-start gap-2.5">
-          <div className={`mt-0.5 w-3 h-3 rounded-full flex-shrink-0 ${
-            recommendation === 'PCI'      ? 'bg-blue-500' :
-            recommendation === 'CABG'     ? 'bg-red-500'  : 'bg-amber-400'
-          }`} />
-          <div>
-            <p className={`text-sm font-bold ${
-              recommendation === 'equipoise' ? 'text-amber-800' : 'text-emerald-800'
-            }`}>
-              {recommendation === 'PCI'
-                ? `PCI predicted to have lower 4-year mortality (${fmt1(mortalityPCI)}% vs ${fmt1(mortalityCABG)}%)`
-                : recommendation === 'CABG'
-                ? `CABG predicted to have lower 4-year mortality (${fmt1(mortalityCABG)}% vs ${fmt1(mortalityPCI)}%)`
-                : `No significant difference (PCI ${fmt1(mortalityPCI)}% vs CABG ${fmt1(mortalityCABG)}%)`
-              }
-            </p>
-            <p className={`text-xs mt-0.5 ${
-              recommendation === 'equipoise' ? 'text-amber-600' : 'text-emerald-600'
-            }`}>
-              p = {fmtP(pValue)}
-              {sigDiff
-                ? ' — statistically significant difference'
-                : ' — not significant; heart team discussion recommended'}
-            </p>
-          </div>
-        </div>
       </div>
 
       <p className="text-xs text-gray-300 mt-3 text-center">

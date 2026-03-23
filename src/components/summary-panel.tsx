@@ -69,11 +69,9 @@ function exportToText(props: Props): string {
 
   // SYNTAX II
   if (syntaxIIResult) {
-    lines.push('─── SYNTAX SCORE II (PCI vs CABG) ───')
+    lines.push('─── SYNTAX SCORE II ───')
     lines.push(`  PCI:  SS2 = ${formatInt(syntaxIIResult.ss2PCI)}, 4-yr mortality = ${formatPct(syntaxIIResult.mortalityPCI)}`)
     lines.push(`  CABG: SS2 = ${formatInt(syntaxIIResult.ss2CABG)}, 4-yr mortality = ${formatPct(syntaxIIResult.mortalityCABG)}`)
-    lines.push(`  p-value: ${syntaxIIResult.pValue < 0.001 ? '<0.001' : syntaxIIResult.pValue.toFixed(3)}`)
-    lines.push(`  Recommendation: ${syntaxIIResult.recommendation === 'equipoise' ? 'Equipoise (PCI ≈ CABG)' : syntaxIIResult.recommendation + ' favored'}`)
     lines.push('')
   }
 
@@ -99,9 +97,6 @@ function exportToText(props: Props): string {
 
   // Overall
   lines.push('─── INTEGRATED ASSESSMENT ───')
-  if (syntaxIIResult) {
-    lines.push(`  Revascularization: ${syntaxIIResult.recommendation === 'equipoise' ? 'PCI or CABG (equipoise)' : syntaxIIResult.recommendation + ' favored'}`)
-  }
   if (euroScoreResult) {
     lines.push(`  Surgical risk: ${formatPct(euroScoreResult.predictedMortality)} (EuroSCORE II)`)
   }
@@ -235,18 +230,6 @@ function generateHTML(props: Props): string {
       </div>
     </div>
 
-    ${s2 ? `<div class="rec" style="background:${recBg};border:1px solid ${recColor}20">
-      <div class="icon">${s2.recommendation === 'PCI' ? '🫀' : s2.recommendation === 'CABG' ? '🔪' : '⚖️'}</div>
-      <div>
-        <div class="title" style="color:${recColor}">${s2.recommendation === 'PCI' ? 'PCI Favored' : s2.recommendation === 'CABG' ? 'CABG Favored' : 'Equipoise — Heart Team Discussion'}</div>
-        <div class="detail">
-          SYNTAX I: ${cat.label} (${formatInt(syntaxIScore)})
-          ${es ? ` · Surgical risk: ${formatPct(es.predictedMortality)}` : ''}
-          ${ef ? ` · Frailty: ${fl?.label}` : ''}
-        </div>
-        ${ef && ef.frailtyClass === 'frail' && s2.recommendation === 'CABG' ? `<div class="detail" style="color:#d97706;font-weight:600;margin-top:4px">⚠️ Patient is frail — consider impact on CABG outcomes (1-yr: ${ef.mortality1yr.cabg}%, 5-yr: ${ef.mortality5yr.cabg}%)</div>` : ''}
-      </div>
-    </div>` : ''}
 
     ${s2 ? `<div class="section">
       <div class="section-title">Detailed Comparison</div>
@@ -372,14 +355,11 @@ export function SummaryPanel(props: Props) {
             <p className="text-[10px] font-bold text-indigo-500 uppercase tracking-wider mb-1">SYNTAX II</p>
             {syntaxIIResult ? (
               <>
-                <p className="text-lg font-bold text-indigo-800">
-                  {syntaxIIResult.recommendation === 'equipoise' ? 'Equipoise' : syntaxIIResult.recommendation}
-                </p>
-                <div className="flex gap-2 mt-0.5">
-                  <span className="text-[10px] text-gray-500">PCI {formatPct(syntaxIIResult.mortalityPCI)}</span>
-                  <span className="text-[10px] text-gray-500">CABG {formatPct(syntaxIIResult.mortalityCABG)}</span>
+                <div className="space-y-0.5 mt-0.5">
+                  <p className="text-[11px] text-gray-600">PCI {formatPct(syntaxIIResult.mortalityPCI)}</p>
+                  <p className="text-[11px] text-gray-600">CABG {formatPct(syntaxIIResult.mortalityCABG)}</p>
                 </div>
-                <p className="text-[10px] text-gray-400">4-yr mortality</p>
+                <p className="text-[10px] text-gray-400 mt-1">4-yr mortality</p>
               </>
             ) : (
               <p className="text-xs text-gray-400 mt-1">Enter clinical data</p>
@@ -422,37 +402,7 @@ export function SummaryPanel(props: Props) {
           </div>
         </div>
 
-        {/* Decision guidance */}
-        {syntaxIIResult && (
-          <div className={`p-3 rounded-xl border ${
-            syntaxIIResult.recommendation === 'PCI' ? 'bg-blue-50 border-blue-200' :
-            syntaxIIResult.recommendation === 'CABG' ? 'bg-emerald-50 border-emerald-200' :
-            'bg-amber-50 border-amber-200'
-          }`}>
-            <div className="flex items-start gap-2">
-              <span className="text-base mt-0.5">
-                {syntaxIIResult.recommendation === 'PCI' ? '🫀' : syntaxIIResult.recommendation === 'CABG' ? '🔪' : '⚖️'}
-              </span>
-              <div>
-                <p className="text-sm font-bold text-gray-800">
-                  {syntaxIIResult.recommendation === 'PCI' ? 'PCI Favored' :
-                   syntaxIIResult.recommendation === 'CABG' ? 'CABG Favored' :
-                   'Equipoise — Heart Team Discussion'}
-                </p>
-                <p className="text-xs text-gray-500 mt-0.5">
-                  SYNTAX I: {cat.label} ({formatInt(syntaxIScore)})
-                  {euroScoreResult && ` · Surgical risk: ${formatPct(euroScoreResult.predictedMortality)}`}
-                  {eftResult && ` · Frailty: ${FRAILTY_LABELS[eftResult.frailtyClass].label}`}
-                </p>
-                {eftResult && eftResult.frailtyClass === 'frail' && syntaxIIResult.recommendation === 'CABG' && (
-                  <p className="text-xs text-amber-700 mt-1 font-semibold">
-                    ⚠️ Patient is frail — consider impact on CABG outcomes (1-yr: {eftResult.mortality1yr.cabg}%, 5-yr: {eftResult.mortality5yr.cabg}%)
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
+
       </div>
     </div>
   )
