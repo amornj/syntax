@@ -352,14 +352,20 @@ export function SummaryPanel(props: Props) {
 
           {/* SYNTAX II */}
           <div className="p-3 rounded-xl bg-indigo-50 border border-indigo-100">
-            <p className="text-[10px] font-bold text-indigo-500 uppercase tracking-wider mb-1">SYNTAX II</p>
+            <p className="text-[10px] font-bold text-indigo-500 uppercase tracking-wider mb-2">SYNTAX II</p>
             {syntaxIIResult ? (
               <>
-                <div className="space-y-0.5 mt-0.5">
-                  <p className="text-[11px] text-gray-600">PCI {formatPct(syntaxIIResult.mortalityPCI)}</p>
-                  <p className="text-[11px] text-gray-600">CABG {formatPct(syntaxIIResult.mortalityCABG)}</p>
+                <div className="space-y-2">
+                  <div>
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-0.5">PCI</p>
+                    <p className="text-2xl font-bold text-indigo-800 tabular-nums leading-none">{formatPct(syntaxIIResult.mortalityPCI)}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-0.5">CABG</p>
+                    <p className="text-2xl font-bold text-indigo-800 tabular-nums leading-none">{formatPct(syntaxIIResult.mortalityCABG)}</p>
+                  </div>
                 </div>
-                <p className="text-[10px] text-gray-400 mt-1">4-yr mortality</p>
+                <p className="text-[10px] text-gray-400 mt-2">4-yr mortality</p>
               </>
             ) : (
               <p className="text-xs text-gray-400 mt-1">Enter clinical data</p>
